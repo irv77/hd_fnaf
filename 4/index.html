@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<style type="text/css">
+html {height: 100%;}
+body {
+      background-color: #1d1d1d;
+      text-align: center;
+      margin: 0;
+      padding: 0;
+}
+h1 {
+	font-family: Arial, Helvetica, sans-serif;
+	color: #962300;
+	font-size: 25px;
+}
+p {
+	font-family: Arial, Helvetica, sans-serif;
+	color: #777;
+	font-size: 12px;
+}
+#bloctxt {
+	border-left-width: 5px;
+	border-left-style: solid;
+	border-left-color: #962300;
+	padding-left: 10px;
+	position: absolute;
+	top:5%;
+	left: 50%;
+	width: 600px;
+	margin-left: -260px
+}
+</style>
+
+<title>Five Nights at Freddy's 4</title>
+<link rel="icon" type="image/x-icon" href="favicon.ico" />
+
+	<script>
+	   	// Detection of old browsers that do not support the canvas element
+		// Falls back to a default page
+	    if (!document.createElement("canvas").getContext)
+	    {
+			window.open("http://www.clickteam.com/html5-fallback", "_self");
+		}
+	</script>
+	
+  	<!-- EXTRASOURCES -->
+	<!-- Loads the Javascript code...-->
+  	<script src="src/Runtime.js"></script>
+  	
+  <script>
+
+	// Detects if the html file is ran locally.
+	// You can remove this code for the final version
+	if (window.location.protocol == "file:")
+	{
+		document.write('<div id="bloctxt">');
+		document.write('<h1>The application cannot be run...</h1>');
+		document.write('<p>HTML browsers do not allow you to launch data files directly from the file system.<br>');
+		document.write('A drag & drop of the html file on a web-browser window will not work, on any machine.<br>');
+		document.write('Please use the Build & Run option (it opens a local web server) to run your application,<br>') 
+		document.write('or upload your application folder to a remote web-server, and start it from there...</p>');
+		document.write('</div>');
+		throw new error("Cannot run application");
+	}
+  </script>
+</head>
+
+<!-- This is where we create the Canvas element that will contain the application...-->
+<body>
+    <div
+      style="display: inline-block; -webkit-user-select: none; text-align: left"
+    >
+      <canvas id="MMFCanvas" width="1024" height="768">
+        Your browser does not support Canvas.
+      </canvas>
+    </div>
+    <script>
+        // RUNTIMESTART
+        // This is where the HTML5 runtime is actually started
+	    window.addEventListener("load", windowLoaded, false);
+	    function windowLoaded()
+	    {
+		    // Calls the runtime
+		    // First parameter : name of the canvas element
+		    // Second parameter : path to the cch file. Images and sounds must lay beside this file
+		    new Runtime("MMFCanvas", "resources/fnaf 4.cch");
+	    }
+        // RUNTIMESTARTEND
+    </script>
+</body>
+</html>
