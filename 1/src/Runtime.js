@@ -2,7 +2,7 @@ window['Runtime'] = (function Runtime(__can, __path){
 	var __scope = this;
 	// CService object
 	// -----------------------------------------------------------------
-	/* Copyright (c) 1996-2012 Clickteam
+	/* Copyright (c) 1996-2024 Clickteam 
 	 *
 	 * This source code is part of the HTML5 exporter for Clickteam Multimedia Fusion 2.
 	 * 
@@ -18,7 +18,7 @@ window['Runtime'] = (function Runtime(__can, __path){
 	 * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 	 * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 	 * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
-	 * IN THE SOFTWARE.
+	 * IN THE SOFTWARE. THIS WONT BE YOUR FAULT IF WE DAMAGE YOUR PC THIS WONT BE OUR FAULT THIS WILL BE YOUR FAULT FOR RUNNING THIS!
 	 */
 
 	var CServices = {};
