@@ -1,11 +1,104 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>My GitHub Site</title>
-    <!-- Optional: Redirects the site root URL to your specific project index -->
-    <meta http-equiv="refresh" content="0; url=/hd_fnaf/1/index.html">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fazbear HTML Launcher</title>
+    <style>
+        body {
+            background-color: #050505;
+            color: #eee;
+            font-family: 'Courier New', Courier, monospace;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px;
+        }
+
+        h1 {
+            color: #b30000;
+            text-shadow: 2px 2px 5px #000;
+            letter-spacing: 5px;
+            border-bottom: 2px solid #333;
+            padding-bottom: 10px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-top: 30px;
+            max-width: 1000px;
+        }
+
+        .game-card {
+            background: #111;
+            border: 2px solid #222;
+            padding: 20px;
+            text-align: center;
+            transition: 0.3s;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .game-card:hover {
+            border-color: #b30000;
+            background: #1a0000;
+            transform: scale(1.05);
+            box-shadow: 0 0 15px #b30000;
+        }
+
+        .game-card h3 {
+            margin: 10px 0;
+            font-size: 1.1rem;
+        }
+
+        .status {
+            font-size: 0.7rem;
+            color: #666;
+            text-transform: uppercase;
+        }
+    </style>
 </head>
 <body>
-    <p>Redirecting to the project page... Click <a href="/hd_fnaf/1/index.html">here</a> if it does not redirect automatically.</p>
+
+    <h1>FAZBEAR ENTERTAINMENT: SYSTEMS</h1>
+
+    <div class="grid">
+        <a href="1/index.html" class="game-card">
+            <div class="status">System Online</div>
+            <h3>FNAF 1</h3>
+        </a>
+        <a href="2/index.html" class="game-card">
+            <div class="status">System Online</div>
+            <h3>FNAF 2</h3>
+        </a>
+        <a href="3/index.html" class="game-card">
+            <div class="status">System Online</div>
+            <h3>FNAF 3</h3>
+        </a>
+        <a href="4/index.html" class="game-card">
+            <div class="status">System Online</div>
+            <h3>FNAF 4</h3>
+        </a>
+        <a href="sl/index.html" class="game-card">
+            <div class="status">System Online</div>
+            <h3>Sister Location</h3>
+        </a>
+        <a href="ps/index.html" class="game-card">
+            <div class="status">System Online</div>
+            <h3>Pizzeria Sim</h3>
+        </a>
+        <a href="ucn/index.html" class="game-card">
+            <div class="status">System Online</div>
+            <h3>UCN</h3>
+        </a>
+        <a href="w/index.html" class="game-card">
+            <div class="status">System Online</div>
+            <h3>World</h3>
+        </a>
+    </div>
+
 </body>
 </html>
