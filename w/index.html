@@ -144,6 +144,7 @@
     <img src="resources/vignette.png" class="vignette">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 </body>
+ 
 <!--Made by irv77-->
 <script>
     const parts = 20;
@@ -333,4 +334,191 @@
         });
     };
 </script>
+<!-- FNaF World Update 2 Character Mod Menu -->
+<style>
+  #fnafw-mod-btn {
+    position: fixed;
+    top: 12px;
+    right: 12px;
+    z-index: 99999;
+    background: #1e1e2e;
+    color: #fff;
+    border: 2px solid #ff6b00;
+    padding: 8px 14px;
+    font-family: monospace;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 6px;
+  }
+  #fnafw-mod-menu {
+    display: none;
+    position: fixed;
+    top: 52px;
+    right: 12px;
+    width: 260px;
+    z-index: 99999;
+    background: rgba(20, 20, 30, 0.95);
+    color: #fff;
+    border: 2px solid #ff6b00;
+    border-radius: 8px;
+    padding: 14px;
+    font-family: monospace;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.6);
+  }
+  #fnafw-mod-menu h3 {
+    margin: 0 0 10px 0;
+    font-size: 15px;
+    color: #ff9d42;
+    border-bottom: 1px solid #444;
+    padding-bottom: 6px;
+  }
+  .mod-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 6px 0;
+    font-size: 13px;
+  }
+  .mod-actions {
+    margin-top: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .mod-actions button {
+    background: #ff6b00;
+    color: #fff;
+    border: none;
+    padding: 7px;
+    font-family: monospace;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 4px;
+  }
+  .mod-actions button:hover {
+    background: #e05e00;
+  }
+  select {
+    background: #2b2b3d;
+    color: #fff;
+    border: 1px solid #555;
+    padding: 3px;
+    font-family: monospace;
+  }
+</style>
+
+<button id="fnafw-mod-btn">Update 2 Mod Menu</button>
+
+<div id="fnafw-mod-menu">
+  <h3>Update 2 Characters</h3>
+  
+  <div class="mod-row">
+    <label for="fnafw-slot">Save Slot:</label>
+    <select id="fnafw-slot">
+      <option value="1">Slot 1</option>
+      <option value="2">Slot 2</option>
+      <option value="3">Slot 3</option>
+    </select>
+  </div>
+
+  <div id="fnafw-char-list"></div>
+
+  <div class="mod-actions">
+    <button id="fnafw-unlock-all">Select All Update 2</button>
+    <button id="fnafw-apply">Save & Reload Game</button>
+  </div>
+</div>
+
+<script>
+(function() {
+  const update2Chars = [
+    { id: 41, name: "Jack-O-Bonnie" },
+    { id: 42, name: "Jack-O-Chica" },
+    { id: 43, name: "Animdude" },
+    { id: 44, name: "Mr. Chipper" },
+    { id: 45, name: "Nightmare BB" },
+    { id: 46, name: "Nightmarionne" },
+    { id: 47, name: "Coffee" },
+    { id: 48, name: "Purple Guy" }
+  ];
+
+  const btn = document.getElementById("fnafw-mod-btn");
+  const menu = document.getElementById("fnafw-mod-menu");
+  const list = document.getElementById("fnafw-char-list");
+  const slotSelect = document.getElementById("fnafw-slot");
+
+  // Toggle menu visibility
+  btn.onclick = () => {
+    menu.style.display = menu.style.display === "block" ? "none" : "block";
+    loadCurrentState();
+  };
+
+  // Build checkboxes for IDs 41-48
+  update2Chars.forEach(c => {
+    const row = document.createElement("div");
+    row.className = "mod-row";
+    row.innerHTML = `
+      <label for="char-${c.id}">${c.name}</label>
+      <input type="checkbox" id="char-${c.id}" data-id="${c.id}">
+    `;
+    list.appendChild(row);
+  });
+
+  // Helper to locate Clickteam localStorage key (handles optional prefixes)
+  function findSaveKey(slot) {
+    const target = "fnafw" + slot;
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key === target || key.endsWith(target)) return key;
+    }
+    return target;
+  }
+
+  // Read existing save data into checkboxes
+  function loadCurrentState() {
+    const key = findSaveKey(slotSelect.value);
+    const raw = localStorage.getItem(key) || "";
+    update2Chars.forEach(c => {
+      const regex = new RegExp(`^${c.id}have=1`, "m");
+      document.getElementById(`char-${c.id}`).checked = regex.test(raw);
+    });
+  }
+
+  slotSelect.onchange = loadCurrentState;
+
+  // Check all boxes
+  document.getElementById("fnafw-unlock-all").onclick = () => {
+    update2Chars.forEach(c => {
+      document.getElementById(`char-${c.id}`).checked = true;
+    });
+  };
+
+  // Write changes to localStorage and reload
+  document.getElementById("fnafw-apply").onclick = () => {
+    const key = findSaveKey(slotSelect.value);
+    let raw = localStorage.getItem(key);
+
+    if (!raw) {
+      alert("No save file found in Slot " + slotSelect.value + "! Start a new game in that slot first.");
+      return;
+    }
+
+    let lines = raw.split(/\r?\n/);
+
+    update2Chars.forEach(c => {
+      const checked = document.getElementById(`char-${c.id}`).checked;
+      const prefix = `${c.id}have=`;
+      lines = lines.filter(line => !line.startsWith(prefix));
+      if (checked) {
+        lines.push(`${c.id}have=1`);
+      }
+    });
+
+    localStorage.setItem(key, lines.join("\n"));
+    location.reload();
+  };
+})();
+</script>
+</body>
 </html>
