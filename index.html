@@ -91,10 +91,6 @@
     <i class="rivet tl"></i><i class="rivet tr"></i><i class="rivet bl"></i><i class="rivet br"></i>
     <div class="topbar">
       <div class="top-left"><span class="sys">SYS.OS v19.87</span><span>UNIDAD: GUARDIA NOCTURNO // OFICINA ESTE</span></div>
-      <div class="top-right">
-        <button class="control" id="sound" type="button" aria-pressed="false">● AUDIO: OFF</button>
-        <button class="control active" id="crt" type="button" aria-pressed="true">CRT: ON</button>
-      </div>
     </div>
     <header>
       <p class="eyebrow">FREDDY FAZBEAR'S PIZZA • EST. 1987</p>
@@ -171,40 +167,6 @@
       cancel.addEventListener('click',closeModal);
       modal.addEventListener('click',e=>{if(e.target===modal)closeModal();});
       document.addEventListener('keydown',e=>{if(e.key==='Escape'&&modal.classList.contains('open'))closeModal();});
-
-      const crt=document.getElementById('crt');
-      const scanlines=document.getElementById('scanlines');
-      crt.addEventListener('click',()=>{
-        const on=crt.getAttribute('aria-pressed')!=='true';
-        crt.setAttribute('aria-pressed',String(on));
-        crt.textContent='CRT: '+(on?'ON':'OFF');
-        crt.classList.toggle('active',on);
-        scanlines.style.opacity=on?'.48':'0';
-      });
-
-      let audioContext=null,oscillator=null,gain=null,audioOn=false;
-      const sound=document.getElementById('sound');
-      sound.addEventListener('click',async()=>{
-        const AudioContextClass=window.AudioContext||window.webkitAudioContext;
-        if(!AudioContextClass)return;
-        if(!audioContext){
-          audioContext=new AudioContextClass();
-          oscillator=audioContext.createOscillator();
-          const filter=audioContext.createBiquadFilter();
-          gain=audioContext.createGain();
-          oscillator.type='sawtooth';oscillator.frequency.value=58;
-          filter.type='lowpass';filter.frequency.value=135;
-          gain.gain.value=0;
-          oscillator.connect(filter);filter.connect(gain);gain.connect(audioContext.destination);
-          oscillator.start();
-        }
-        if(audioContext.state==='suspended')await audioContext.resume();
-        audioOn=!audioOn;
-        gain.gain.setTargetAtTime(audioOn?.035:0,audioContext.currentTime,.2);
-        sound.textContent='● AUDIO: '+(audioOn?'ON':'OFF');
-        sound.setAttribute('aria-pressed',String(audioOn));
-        sound.classList.toggle('active',audioOn);
-      });
 
       let minutes=0,power=99;
       const clock=document.getElementById('clock'),powerEl=document.getElementById('power');
