@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#090807">
   <meta name="description" content="Colección fan-made de juegos de Five Nights at Freddy's.">
-  <link rel="icon" href="/favicon.ico?v=1" sizes="any">
+  <link rel="icon" href="/favicon.ico?v=2" sizes="any">
   <title>Freddy Fazbear's Pizza | Night Shift Archives</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Special+Elite&family=Oswald:wght@400;500;600;700&display=swap');
@@ -45,6 +45,34 @@
     .cam { color:#a74638; letter-spacing:.12em; }
     @media(max-width:520px){.monitor{padding:22px 15px}.games{grid-template-columns:1fr}.game{min-height:96px}footer{justify-content:center;text-align:center}}
     @media(prefers-reduced-motion:reduce){.game,.led{transition:none;animation:none}}
+
+    /* En escritorio, todo el menú cabe en una sola pantalla. */
+    @media (min-width:760px) {
+      body { height:100svh; min-height:0; overflow:hidden; padding:clamp(8px,1.5vh,16px) 16px; }
+      main { width:min(1120px,100%); max-height:100%; }
+      .monitor { padding:clamp(12px,2vh,24px); }
+      header { padding:2px 0 12px; margin-bottom:14px; }
+      h1 { font-size:clamp(2.2rem,7vh,4.6rem); margin:10px 0 5px; }
+      h1 span { margin-top:7px; }
+      .subtitle { margin-top:10px; font-size:.82rem; line-height:1.35; }
+      .status { margin-top:12px; }
+      .section-title { margin-bottom:9px; }
+      .games { grid-template-columns:repeat(4,minmax(0,1fr)); gap:9px; }
+      .game { min-height:clamp(76px,11vh,96px); padding:10px 13px; gap:5px; }
+      .name { font-size:clamp(1rem,2.1vh,1.25rem); }
+      footer { margin-top:14px; padding-top:10px; }
+    }
+    @media (min-width:760px) and (max-height:650px) {
+      .monitor { padding:10px 18px; }
+      header { padding-bottom:8px; margin-bottom:10px; }
+      h1 { font-size:2.5rem; margin:7px 0 3px; }
+      h1 span { margin-top:4px; }
+      .subtitle { margin-top:6px; font-size:.72rem; }
+      .status { margin-top:7px; }
+      .game { min-height:68px; padding:7px 11px; }
+      .section-title { margin-bottom:6px; }
+      footer { margin-top:9px; padding-top:7px; }
+    }
   </style>
 </head>
 <body>
