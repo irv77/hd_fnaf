@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#090909">
+  <title>Five Nights at Freddy's | Selector de juegos</title>
+  <style>
+    :root { color-scheme: dark; }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; min-height: 100vh; color: #f5f2e9;
+      font-family: Arial, Helvetica, sans-serif;
+      background: radial-gradient(ellipse at top, #292020 0%, #111 48%, #050505 100%);
+      display: grid; place-items: center; padding: 32px 18px;
+    }
+    main { width: min(920px, 100%); text-align: center; }
+    .eyebrow { color: #c59b55; letter-spacing: .28em; font-size: .75rem; text-transform: uppercase; }
+    h1 { margin: 12px 0 8px; font-size: clamp(2.2rem, 7vw, 4.8rem); line-height: .98; text-transform: uppercase; text-shadow: 0 4px 24px #000; }
+    h1 span { color: #c49a55; }
+    .subtitle { color: #aaa; margin: 0 auto 34px; max-width: 560px; line-height: 1.6; }
+    .games { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 14px; }
+    .game {
+      display: flex; flex-direction: column; align-items: flex-start; gap: 7px;
+      min-height: 112px; padding: 20px; text-align: left; text-decoration: none;
+      color: #f7f4ed; background: linear-gradient(145deg, #242424, #111);
+      border: 1px solid #494039; border-radius: 10px;
+      transition: transform .18s ease, border-color .18s ease, background .18s ease;
+    }
+    .game:hover, .game:focus-visible { transform: translateY(-4px); border-color: #c49a55; background: #29231d; outline: none; }
+    .number { color: #c49a55; font-size: .75rem; letter-spacing: .16em; text-transform: uppercase; }
+    .name { font-size: 1.25rem; font-weight: 800; }
+    .desc { color: #999; font-size: .85rem; }
+    footer { margin-top: 30px; color: #666; font-size: .75rem; line-height: 1.6; }
+    @media (prefers-reduced-motion: reduce) { .game { transition: none; } }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="eyebrow">The collection</div>
+    <h1>Five Nights <span>at Freddy's</span></h1>
+    <p class="subtitle">Elige un juego y prepárate para pasar la noche. ¿Cuánto tiempo podrás sobrevivir?</p>
+    <nav class="games" aria-label="Seleccionar juego">
+      <a class="game" href="./1/"><span class="number">Juego 01</span><span class="name">FNAF 1</span><span class="desc">The original</span></a>
+      <a class="game" href="./2/"><span class="number">Juego 02</span><span class="name">FNAF 2</span><span class="desc">The new and improved</span></a>
+      <a class="game" href="./3/"><span class="number">Juego 03</span><span class="name">FNAF 3</span><span class="desc">Thirty years later</span></a>
+      <a class="game" href="./4/"><span class="number">Juego 04</span><span class="name">FNAF 4</span><span class="desc">The final chapter</span></a>
+      <a class="game" href="./w/"><span class="number">Extra</span><span class="name">FNAF World</span><span class="desc">An unexpected adventure</span></a>
+      <a class="game" href="./sl/"><span class="number">Extra</span><span class="name">Sister Location</span><span class="desc">深 underground facility</span></a>
+      <a class="game" href="./ps/"><span class="number">Extra</span><span class="name">Pizzeria Simulator</span><span class="desc">Your own pizzeria</span></a>
+      <a class="game" href="./ucn/"><span class="number">Extra</span><span class="name">Ultimate Custom Night</span><span class="desc">The ultimate challenge</span></a>
+    </nav>
+    <footer>Fan-made game collection. Not an official FNAF product and not affiliated with Scott Cawthon.</footer>
+  </main>
+</body>
+</html>
