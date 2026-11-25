@@ -276,39 +276,35 @@
 
         function mergeFiles(fileParts) {
             return new Promise((resolve, reject) => {
-                let buffers = [];
-                let totalSize = 0;
-                let loadedSize = 0;
-                Promise.all(fileParts.map(part =>
-                    fetch(part, { method: 'HEAD' }).then(res => {
-                        try {
-                            if (!res.ok) throw new Error("Missing part: " + part);
-                            return parseInt(res.headers.get("Content-Length") || "0", 10);
-                        } catch (error) { document.getElementById('stage').innerHTML = "ERROR: MISSING FILE(S)..." }
-                    })
-                )).then(sizes => {
-                    totalSize = sizes.reduce((a, b) => a + b, 0);
-                    function fetchPart(index) {
-                        if (index >= fileParts.length) {
-                            let mergedBlob = new Blob(buffers);
-                            let mergedFileUrl = URL.createObjectURL(mergedBlob);
-                            resolve(mergedFileUrl);
-                            return;
+                const buffers = [];
+
+                async function fetchParts() {
+                    try {
+                        // No dependemos de Content-Length: algunos hosts no lo envían
+                        // en las peticiones HEAD y eso provocaba Infinity% en la carga.
+                        for (let i = 0; i < fileParts.length; i++) {
+                            const response = await fetch(fileParts[i]);
+                            if (!response.ok) {
+                                throw new Error("Missing part: " + fileParts[i]);
+                            }
+
+                            const data = await response.arrayBuffer();
+                            buffers.push(data);
+                            updateProgress(
+                                'LOCATING ARCHIVE...',
+                                Math.floor(((i + 1) / fileParts.length / 2) * 100)
+                            );
                         }
 
-                        fetch(fileParts[index]).then((response) => {
-                            if (!response.ok) throw new Error("Missing part: " + fileParts[index]);
-                            return response.arrayBuffer();
-                        }).then((data) => {
-                            buffers.push(data);
-                            loadedSize += data.byteLength;
-                            updateProgress('LOCATING ARCHIVE...', Math.floor((loadedSize / totalSize / 2) * 100));
-                            fetchPart(index + 1);
-                        }).catch(reject);
+                        const mergedBlob = new Blob(buffers);
+                        resolve(URL.createObjectURL(mergedBlob));
+                    } catch (error) {
+                        document.getElementById('stage').innerHTML = "ERROR: " + error.message;
+                        reject(error);
                     }
+                }
 
-                    fetchPart(0);
-                }).catch(reject);
+                fetchParts();
             });
         }
 
