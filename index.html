@@ -77,6 +77,24 @@
     .action:hover{border-color:var(--gold);color:var(--cream)}
     .launch{background:var(--gold);color:#0a0806;font-weight:700;border-color:var(--gold)}
     .launch:hover{background:#e8c67a;color:#0a0806}
+
+    .archive-tools{display:flex;align-items:center;gap:8px;margin:-2px 0 12px}
+    .search-wrap{position:relative;flex:1;min-width:150px}
+    .search-wrap:before{content:"⌕";position:absolute;left:11px;top:50%;transform:translateY(-54%);color:var(--gold);font-size:18px;pointer-events:none}
+    .game-search{width:100%;height:34px;padding:0 12px 0 31px;background:#0b0906;border:1px solid var(--line);border-radius:3px;color:var(--cream);font:10px "IBM Plex Mono",monospace;outline:none}
+    .game-search::placeholder{color:#796847}
+    .game-search:focus{border-color:var(--gold);box-shadow:0 0 0 2px rgba(216,180,103,.1)}
+    .filter-btn{height:34px;padding:0 12px;border:1px solid var(--line);border-radius:3px;background:rgba(216,180,103,.06);color:#bda16b;font:10px "IBM Plex Mono",monospace;cursor:pointer;white-space:nowrap;transition:.12s}
+    .filter-btn:hover,.filter-btn.active{border-color:var(--gold);background:rgba(216,180,103,.15);color:var(--cream)}
+    .results-count{min-width:48px;text-align:right;color:#8f7952;font:9px "IBM Plex Mono",monospace}
+    .game-entry{position:relative;min-width:0}
+    .game-entry .card{width:100%;height:100%}
+    .favorite-toggle{position:absolute;z-index:4;right:9px;top:34px;width:27px;height:27px;border:1px solid rgba(216,180,103,.22);border-radius:3px;background:rgba(5,4,3,.78);color:#92794c;font-size:16px;line-height:1;cursor:pointer;transition:.12s}
+    .favorite-toggle:hover,.favorite-toggle.is-favorite{color:#f0c66f;border-color:var(--gold);background:#21190e}
+    .favorite-toggle:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+    .empty-state{grid-column:1/-1;padding:24px 12px;text-align:center;border:1px dashed var(--line);color:#9e8963;font:10px "IBM Plex Mono",monospace;letter-spacing:.08em}
+    @media(max-width:560px){.archive-tools{gap:6px;margin-bottom:9px}.filter-btn{padding:0 9px;font-size:9px}.results-count{min-width:38px;font-size:8px}.favorite-toggle{top:31px;right:7px}}
+
     @media(max-width:850px){.games{grid-template-columns:repeat(2,minmax(0,1fr))}.card{min-height:118px}}
     @media(max-width:560px){body{padding:8px;align-items:flex-start}.terminal{padding:17px 13px}.topbar{justify-content:center}.top-left{justify-content:center}.top-right{justify-content:center}header{padding:22px 4px 19px}.archive-head{align-items:flex-start}.telemetry{width:100%;justify-content:space-between}.games{grid-template-columns:1fr 1fr;gap:8px}.card{min-height:115px;padding:11px}.card h2{font-size:14px}.archive,.cam{font-size:8px}.start{font-size:8px}footer{justify-content:center;text-align:center}.disclaimer{line-height:1.5}}
     @media(max-width:370px){.games{grid-template-columns:1fr}.card{min-height:105px}}
@@ -106,7 +124,12 @@
         <div id="clock">12:00 AM • NIGHT 1</div>
       </div>
     </div>
-    <section class="games" aria-label="Archivos de juegos disponibles">
+    <div class="archive-tools" role="search">
+      <div class="search-wrap"><input class="game-search" id="game-search" type="search" placeholder="BUSCAR EN ARCHIVOS..." autocomplete="off" aria-label="Buscar juegos"></div>
+      <button class="filter-btn" id="favorites-filter" type="button" aria-pressed="false">☆ FAVORITOS</button>
+      <span class="results-count mono" id="results-count" aria-live="polite">08 / 08</span>
+    </div>
+    <section class="games" id="games-grid" aria-label="Archivos de juegos disponibles">
       <button class="card" type="button" data-archive="ARCHIVO 01 • 1993" data-cam="CAM-01" data-title="Five Nights at Freddy's" data-subtitle="The original night shift" data-threat="ALTO // ANIMATRÓNICOS CLÁSICOS" data-desc="Vigila las cámaras de seguridad y controla las puertas del local original de Freddy Fazbear's Pizza. Conserva energía hasta las 6:00 AM." data-href="./1/">
         <span class="geo"></span><span class="card-top"><span class="archive">ARCHIVO 01 • 1993</span><span class="cam">CAM-01</span></span><span><h2>Five Nights at Freddy's</h2><p>The original night shift</p></span><span class="card-bottom start"><span>[ INICIAR TURNO ]</span><b class="arrow">→</b></span>
       </button>
@@ -167,6 +190,69 @@
       cancel.addEventListener('click',closeModal);
       modal.addEventListener('click',e=>{if(e.target===modal)closeModal();});
       document.addEventListener('keydown',e=>{if(e.key==='Escape'&&modal.classList.contains('open'))closeModal();});
+
+      const grid=document.getElementById('games-grid');
+      const search=document.getElementById('game-search');
+      const favoritesFilter=document.getElementById('favorites-filter');
+      const resultsCount=document.getElementById('results-count');
+      const cards=[...grid.querySelectorAll('.card')];
+      const favoriteKey='fazbear-terminal-favorites-v1';
+      let favorites=[];
+      try{favorites=JSON.parse(localStorage.getItem(favoriteKey)||'[]');if(!Array.isArray(favorites))favorites=[];}catch(_){favorites=[];}
+      cards.forEach(card=>{
+        const entry=document.createElement('div');
+        entry.className='game-entry';
+        card.parentNode.insertBefore(entry,card);
+        entry.appendChild(card);
+        const favorite=document.createElement('button');
+        favorite.type='button';
+        favorite.className='favorite-toggle';
+        favorite.setAttribute('aria-label','Añadir '+card.dataset.title+' a favoritos');
+        favorite.setAttribute('aria-pressed','false');
+        favorite.textContent='☆';
+        entry.appendChild(favorite);
+        const syncFavorite=()=>{
+          const active=favorites.includes(card.dataset.href);
+          favorite.classList.toggle('is-favorite',active);
+          favorite.textContent=active?'★':'☆';
+          favorite.setAttribute('aria-pressed',String(active));
+          favorite.setAttribute('aria-label',(active?'Quitar ':'Añadir ')+card.dataset.title+' '+(active?'de':'a')+' favoritos');
+        };
+        syncFavorite();
+        favorite.addEventListener('click',()=>{
+          favorites=favorites.includes(card.dataset.href)?favorites.filter(href=>href!==card.dataset.href):[...favorites,card.dataset.href];
+          try{localStorage.setItem(favoriteKey,JSON.stringify(favorites));}catch(_){}
+          syncFavorite();
+          renderCards();
+        });
+      });
+      let favoritesOnly=false;
+      function renderCards(){
+        const query=search.value.trim().toLocaleLowerCase('es');
+        let visible=0;
+        cards.forEach(card=>{
+          const entry=card.closest('.game-entry');
+          const matchesText=[card.dataset.title,card.dataset.subtitle,card.dataset.archive].join(' ').toLocaleLowerCase('es').includes(query);
+          const matchesFavorite=!favoritesOnly||favorites.includes(card.dataset.href);
+          const show=matchesText&&matchesFavorite;
+          entry.hidden=!show;
+          if(show)visible++;
+        });
+        resultsCount.textContent=String(visible).padStart(2,'0')+' / '+String(cards.length).padStart(2,'0');
+        let empty=grid.querySelector('.empty-state');
+        if(!visible){
+          if(!empty){empty=document.createElement('div');empty.className='empty-state';empty.textContent='NO SE HAN ENCONTRADO ARCHIVOS // PRUEBA OTRA BÚSQUEDA';grid.appendChild(empty);}
+        }else if(empty)empty.remove();
+      }
+      search.addEventListener('input',renderCards);
+      favoritesFilter.addEventListener('click',()=>{
+        favoritesOnly=!favoritesOnly;
+        favoritesFilter.classList.toggle('active',favoritesOnly);
+        favoritesFilter.setAttribute('aria-pressed',String(favoritesOnly));
+        favoritesFilter.textContent=favoritesOnly?'★ MOSTRANDO FAVORITOS':'☆ FAVORITOS';
+        renderCards();
+      });
+      renderCards();
 
       let minutes=0,power=99;
       const clock=document.getElementById('clock'),powerEl=document.getElementById('power');
