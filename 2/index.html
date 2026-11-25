@@ -280,26 +280,39 @@
 
                 async function fetchParts() {
                     try {
-                        // No dependemos de Content-Length: algunos hosts no lo envían
-                        // en las peticiones HEAD y eso provocaba Infinity% en la carga.
-                        for (let i = 0; i < fileParts.length; i++) {
-                            const response = await fetch(fileParts[i]);
-                            if (!response.ok) {
-                                throw new Error("Missing part: " + fileParts[i]);
-                            }
+                        // Descarga hasta cuatro fragmentos a la vez sin cambiar su orden.
+                        // Esto reduce la espera de red y limita el uso de memoria.
+                        const workerCount = Math.min(4, fileParts.length);
+                        let nextPart = 0;
+                        let completedParts = 0;
 
-                            const data = await response.arrayBuffer();
-                            buffers.push(data);
-                            updateProgress(
-                                'LOCATING ARCHIVE...',
-                                Math.floor(((i + 1) / fileParts.length / 2) * 100)
-                            );
+                        async function worker() {
+                            while (true) {
+                                const index = nextPart++;
+                                if (index >= fileParts.length) return;
+
+                                const response = await fetch(fileParts[index]);
+                                if (!response.ok) {
+                                    throw new Error("Missing part: " + fileParts[index]);
+                                }
+
+                                buffers[index] = await response.arrayBuffer();
+                                completedParts++;
+                                updateProgress(
+                                    'LOCATING ARCHIVE...',
+                                    Math.floor((completedParts / fileParts.length / 2) * 100)
+                                );
+                            }
                         }
+
+                        await Promise.all(
+                            Array.from({ length: workerCount }, () => worker())
+                        );
 
                         const mergedBlob = new Blob(buffers);
                         resolve(URL.createObjectURL(mergedBlob));
                     } catch (error) {
-                        document.getElementById('stage').innerHTML = "ERROR: " + error.message;
+                        document.getElementById('stage').textContent = "ERROR: " + error.message;
                         reject(error);
                     }
                 }
