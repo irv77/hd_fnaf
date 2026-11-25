@@ -1,0 +1,58 @@
+name: Site integrity checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  check-site:
+    name: Check menu and game assets
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+
+      - name: Validate all game entry points and archive parts
+        run: |
+          node --input-type=module <<'NODE'
+          import { existsSync, readFileSync } from 'node:fs';
+
+          const games = ['1', '2', '3', '4', 'ps', 'sl', 'ucn', 'w'];
+          const menu = readFileSync('index.html', 'utf8');
+
+          for (const game of games) {
+            if (!menu.includes(`href="./${game}/"`)) {
+              throw new Error(`The main menu is missing the ${game} game link`);
+            }
+
+            const htmlPath = `${game}/index.html`;
+            if (!existsSync(htmlPath)) throw new Error(`Missing ${htmlPath}`);
+
+            const html = readFileSync(htmlPath, 'utf8');
+            if (!html.includes('const parts = 20;')) {
+              throw new Error(`${htmlPath}: expected 20 archive parts`);
+            }
+            if (!html.includes('const workerCount = Math.min(4, fileParts.length);')) {
+              throw new Error(`${htmlPath}: parallel archive loader is missing`);
+            }
+
+            for (const asset of [
+              `${game}/src/Runtime.js`,
+              `${game}/src/resources.zip.part1`,
+              `${game}/src/resources.zip.part20`,
+            ]) {
+              if (!existsSync(asset)) throw new Error(`Missing required game asset: ${asset}`);
+            }
+
+            console.log(`OK: game ${game}`);
+          }
+
+          console.log('All 8 games and their required archive files are present.');
+          NODE
