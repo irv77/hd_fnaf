@@ -3,54 +3,72 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#090909">
-  <title>Five Nights at Freddy's | Selector de juegos</title>
+  <meta name="theme-color" content="#090807">
+  <meta name="description" content="Colección fan-made de juegos de Five Nights at Freddy's.">
+  <link rel="icon" href="/favicon.ico?v=1" sizes="any">
+  <title>Freddy Fazbear's Pizza | Night Shift Archives</title>
   <style>
-    :root { color-scheme: dark; }
-    * { box-sizing: border-box; }
+    @import url('https://fonts.googleapis.com/css2?family=Special+Elite&family=Oswald:wght@400;500;600;700&display=swap');
+    :root { color-scheme: dark; --gold:#c39a5a; --rust:#8f3028; --paper:#d7c9a8; }
+    * { box-sizing:border-box; }
     body {
-      margin: 0; min-height: 100vh; color: #f5f2e9;
-      font-family: Arial, Helvetica, sans-serif;
-      background: radial-gradient(ellipse at top, #292020 0%, #111 48%, #050505 100%);
-      display: grid; place-items: center; padding: 32px 18px;
+      margin:0; min-height:100vh; color:#e7dfcb; font-family:'Oswald',Impact,sans-serif;
+      background:
+        radial-gradient(ellipse at 50% 0%, rgba(116,76,37,.22), transparent 48%),
+        linear-gradient(rgba(0,0,0,.84),rgba(0,0,0,.94)),
+        repeating-linear-gradient(0deg,#171513 0px,#171513 2px,#100f0e 3px,#100f0e 5px);
+      padding:28px 18px 34px; display:grid; place-items:center; overflow-x:hidden;
     }
-    main { width: min(920px, 100%); text-align: center; }
-    .eyebrow { color: #c59b55; letter-spacing: .28em; font-size: .75rem; text-transform: uppercase; }
-    h1 { margin: 12px 0 8px; font-size: clamp(2.2rem, 7vw, 4.8rem); line-height: .98; text-transform: uppercase; text-shadow: 0 4px 24px #000; }
-    h1 span { color: #c49a55; }
-    .subtitle { color: #aaa; margin: 0 auto 34px; max-width: 560px; line-height: 1.6; }
-    .games { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 14px; }
-    .game {
-      display: flex; flex-direction: column; align-items: flex-start; gap: 7px;
-      min-height: 112px; padding: 20px; text-align: left; text-decoration: none;
-      color: #f7f4ed; background: linear-gradient(145deg, #242424, #111);
-      border: 1px solid #494039; border-radius: 10px;
-      transition: transform .18s ease, border-color .18s ease, background .18s ease;
-    }
-    .game:hover, .game:focus-visible { transform: translateY(-4px); border-color: #c49a55; background: #29231d; outline: none; }
-    .number { color: #c49a55; font-size: .75rem; letter-spacing: .16em; text-transform: uppercase; }
-    .name { font-size: 1.25rem; font-weight: 800; }
-    .desc { color: #999; font-size: .85rem; }
-    footer { margin-top: 30px; color: #666; font-size: .75rem; line-height: 1.6; }
-    @media (prefers-reduced-motion: reduce) { .game { transition: none; } }
+    body:before { content:""; position:fixed; inset:0; pointer-events:none; opacity:.14; z-index:2;
+      background:repeating-linear-gradient(0deg,transparent 0 3px,rgba(0,0,0,.7) 4px 5px); }
+    main { width:min(1000px,100%); position:relative; z-index:1; }
+    .monitor { border:1px solid #625039; background:rgba(9,9,8,.88); box-shadow:0 0 0 7px rgba(0,0,0,.55),0 0 50px #000, inset 0 0 45px rgba(126,83,37,.08); padding:clamp(20px,4vw,42px); position:relative; }
+    .monitor:before,.monitor:after { content:""; position:absolute; width:10px;height:10px;border:1px solid #765c38; border-radius:50%; top:12px; }
+    .monitor:before{left:12px}.monitor:after{right:12px}
+    header { text-align:center; padding:12px 0 30px; border-bottom:1px solid #3b3024; margin-bottom:25px; }
+    .eyebrow { color:#b48a50; letter-spacing:.34em; font-size:.72rem; text-transform:uppercase; }
+    h1 { font-size:clamp(2.5rem,8vw,5.8rem); line-height:.9; margin:17px 0 8px; text-transform:uppercase; font-weight:700; letter-spacing:.015em; text-shadow:3px 4px 0 #21170f,0 0 24px rgba(184,132,65,.2); }
+    h1 span { display:block; color:var(--gold); font-size:.56em; letter-spacing:.13em; margin-top:12px; }
+    .subtitle { color:#aaa08d; font: .95rem 'Special Elite',monospace; line-height:1.6; margin:18px auto 0; max-width:620px; }
+    .status { display:flex; justify-content:center; align-items:center; gap:9px; color:#9b8e78; font: .68rem 'Special Elite',monospace; letter-spacing:.15em; margin-top:20px; }
+    .led { width:7px;height:7px;border-radius:50%;background:#a63a2d;box-shadow:0 0 9px #d34332;animation:blink 1.8s infinite; }
+    @keyframes blink { 50% {opacity:.25;box-shadow:0 0 2px #d34332} }
+    .section-title { color:#9e8a68; font-size:.75rem; letter-spacing:.24em; text-transform:uppercase; margin:0 0 13px; }
+    .games { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; }
+    .game { min-height:116px; position:relative; overflow:hidden; display:flex; flex-direction:column; justify-content:center; gap:7px; padding:18px 19px; text-decoration:none; color:#eee5d1; background:linear-gradient(135deg,rgba(53,45,34,.78),rgba(17,16,14,.96)); border:1px solid #514431; border-left:3px solid #8e6c3e; transition:transform .18s,border-color .18s,background .18s; }
+    .game:after { content:""; position:absolute; right:-20px; bottom:-32px; width:105px;height:105px; border:1px solid rgba(195,154,90,.12); border-radius:50%; box-shadow:0 0 0 12px rgba(195,154,90,.025),0 0 0 24px rgba(195,154,90,.02); }
+    .game:hover,.game:focus-visible { transform:translateY(-3px); border-color:var(--gold); border-left-color:#d6ad6b; background:linear-gradient(135deg,#3b3022,#171512); outline:none; }
+    .number { color:#bd9559; font-size:.67rem; letter-spacing:.2em; text-transform:uppercase; }
+    .name { font-size:1.35rem; font-weight:600; letter-spacing:.035em; }
+    .desc { color:#968c7a; font: .75rem 'Special Elite',monospace; }
+    footer { display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-top:25px; padding-top:16px; border-top:1px solid #342b20; color:#756b5a; font: .68rem 'Special Elite',monospace; line-height:1.6; }
+    .cam { color:#a74638; letter-spacing:.12em; }
+    @media(max-width:520px){.monitor{padding:22px 15px}.games{grid-template-columns:1fr}.game{min-height:96px}footer{justify-content:center;text-align:center}}
+    @media(prefers-reduced-motion:reduce){.game,.led{transition:none;animation:none}}
   </style>
 </head>
 <body>
-  <main>
-    <div class="eyebrow">The collection</div>
-    <h1>Five Nights <span>at Freddy's</span></h1>
-    <p class="subtitle">Elige un juego y prepárate para pasar la noche. ¿Cuánto tiempo podrás sobrevivir?</p>
-    <nav class="games" aria-label="Seleccionar juego">
-      <a class="game" href="./1/"><span class="number">Juego 01</span><span class="name">FNAF 1</span><span class="desc">The original</span></a>
-      <a class="game" href="./2/"><span class="number">Juego 02</span><span class="name">FNAF 2</span><span class="desc">The new and improved</span></a>
-      <a class="game" href="./3/"><span class="number">Juego 03</span><span class="name">FNAF 3</span><span class="desc">Thirty years later</span></a>
-      <a class="game" href="./4/"><span class="number">Juego 04</span><span class="name">FNAF 4</span><span class="desc">The final chapter</span></a>
-      <a class="game" href="./w/"><span class="number">Extra</span><span class="name">FNAF World</span><span class="desc">An unexpected adventure</span></a>
-      <a class="game" href="./sl/"><span class="number">Extra</span><span class="name">Sister Location</span><span class="desc">深 underground facility</span></a>
-      <a class="game" href="./ps/"><span class="number">Extra</span><span class="name">Pizzeria Simulator</span><span class="desc">Your own pizzeria</span></a>
-      <a class="game" href="./ucn/"><span class="number">Extra</span><span class="name">Ultimate Custom Night</span><span class="desc">The ultimate challenge</span></a>
-    </nav>
-    <footer>Fan-made game collection. Not an official FNAF product and not affiliated with Scott Cawthon.</footer>
+  <main class="monitor">
+    <header>
+      <div class="eyebrow">Freddy Fazbear's Pizza • Est. 1987</div>
+      <h1>Five Nights <span>at Freddy's</span></h1>
+      <p class="subtitle">WELCOME BACK, NIGHT GUARD.<br>Tu turno empieza a las 12:00 AM. Intenta llegar a las 6:00 AM.</p>
+      <div class="status"><span class="led"></span> SISTEMA DE SEGURIDAD ACTIVO <span class="led"></span></div>
+    </header>
+    <section aria-label="Archivo de juegos">
+      <h2 class="section-title">▸ Night shift archives / Selecciona tu turno</h2>
+      <nav class="games" aria-label="Seleccionar juego">
+        <a class="game" href="./1/"><span class="number">Archivo 01 • 1993</span><span class="name">Five Nights at Freddy's</span><span class="desc">The original night shift</span></a>
+        <a class="game" href="./2/"><span class="number">Archivo 02 • 1987</span><span class="name">Five Nights at Freddy's 2</span><span class="desc">Grand Reopening</span></a>
+        <a class="game" href="./3/"><span class="number">Archivo 03 • 2023</span><span class="name">Five Nights at Freddy's 3</span><span class="desc">Fazbear's Fright</span></a>
+        <a class="game" href="./4/"><span class="number">Archivo 04</span><span class="name">Five Nights at Freddy's 4</span><span class="desc">The final chapter</span></a>
+        <a class="game" href="./sl/"><span class="number">Archivo 05</span><span class="name">Sister Location</span><span class="desc">Circus Baby's Entertainment</span></a>
+        <a class="game" href="./ps/"><span class="number">Archivo 06</span><span class="name">Pizzeria Simulator</span><span class="desc">A new business opportunity</span></a>
+        <a class="game" href="./ucn/"><span class="number">Archivo 07</span><span class="name">Ultimate Custom Night</span><span class="desc">The ultimate challenge</span></a>
+        <a class="game" href="./w/"><span class="number">Archivo Extra</span><span class="name">FNAF World</span><span class="desc">A different kind of adventure</span></a>
+      </nav>
+    </section>
+    <footer><span class="cam">● REC&nbsp; CAM 01 • MAIN MENU</span><span>Fan-made collection. Not affiliated with the official FNAF franchise.</span></footer>
   </main>
 </body>
 </html>
