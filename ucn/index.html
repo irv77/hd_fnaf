@@ -392,7 +392,8 @@
             script.onload = () => {
                 try {
                     new Runtime("MMFCanvas", runtimecanvas);
-                    document.getElementById('MMFCanvas').style.display = 'block';\n                    window.fitMobileCanvas?.();
+                    document.getElementById('MMFCanvas').style.display = 'block';
+                    window.fitMobileCanvas?.();
                     document.getElementById('selection').style.display = 'none';
                     document.title = gametitle;
                 } catch (error) {
