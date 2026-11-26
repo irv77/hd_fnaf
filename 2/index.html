@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Five Nights at Freddy's 2</title>
     <link rel="icon" href="favicon.ico" />
     <style>
@@ -126,6 +126,51 @@
         .loader h2 {
             margin: 1vh 0;
             font-size: 1.4vw;
+        }
+    
+        /* Mobile display: preserve the original game canvas and its aspect ratio. */
+        @media (max-width: 700px), (pointer: coarse) {
+            html, body {
+                width: 100%;
+                height: 100%;
+                min-height: 100%;
+                overflow: hidden;
+            }
+            body {
+                height: 100dvh;
+                min-height: 100dvh;
+                padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+            }
+            canvas {
+                max-width: min(100vw, 1280px);
+                max-height: min(100dvh, 720px);
+                width: auto;
+                height: auto;
+                touch-action: none;
+            }
+            .selection { min-height: 100dvh; }
+            #title {
+                top: 7vh;
+                left: 5vw;
+                height: 15vh;
+                max-width: 55vw;
+                object-fit: contain;
+            }
+            #animatronic {
+                top: 5vh;
+                right: -8vw;
+                height: 75vh;
+                max-width: 65vw;
+                object-fit: contain;
+            }
+            .loader {
+                bottom: max(10vh, calc(env(safe-area-inset-bottom) + 24px));
+                width: 90vw;
+            }
+            .loader h1 { font-size: clamp(28px, 9vw, 54px); }
+            .loader h2 { font-size: clamp(11px, 3vw, 16px); }
+            .glitch, .vignette { height: 100dvh; }
+            .launcher-text img { width: min(65vw, 320px) !important; }
         }
     </style>
 </head>

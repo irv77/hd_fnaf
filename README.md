@@ -30,3 +30,8 @@ El workflow **Site integrity checks** verifica los ocho puntos de entrada, la si
 **Producto fan-made, no oficial.** Este proyecto no está afiliado, patrocinado ni respaldado por Scott Cawthon, Fazbear LLC ni los titulares oficiales de la franquicia.
 
 Five Nights at Freddy's, sus personajes, marcas y materiales originales pertenecen a sus respectivos titulares. Este repositorio no reclama la propiedad de esos elementos. Los derechos y condiciones de uso de los recursos de terceros siguen perteneciendo a sus propietarios.
+
+
+## Compatibilidad móvil
+
+La interfaz se adapta automáticamente a móviles y pantallas táctiles. Los juegos conservan su lienzo y proporciones originales, ajustándose al espacio disponible sin modificar sus mecánicas.
