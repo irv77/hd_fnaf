@@ -172,6 +172,85 @@
             .glitch, .vignette { height: 100dvh; }
             .launcher-text img { width: min(65vw, 320px) !important; }
         }
+    
+        /* Real mobile play layout: fit the native game canvas to the usable viewport. */
+        @media (max-width: 700px), (pointer: coarse) {
+            html, body {
+                width: 100%;
+                height: 100%;
+                min-height: 100%;
+                margin: 0;
+                overflow: hidden;
+            }
+            body {
+                width: 100vw;
+                height: 100dvh;
+                min-height: 100dvh;
+                box-sizing: border-box;
+                padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                overscroll-behavior: none;
+            }
+            canvas#MMFCanvas {
+                display: none;
+                max-width: none;
+                max-height: none;
+                width: auto;
+                height: auto;
+                flex: none;
+                touch-action: none;
+                -webkit-tap-highlight-color: transparent;
+            }
+            .selection { min-height: 100dvh; }
+            .glitch, .vignette { height: 100dvh; }
+            #mobileRotateNotice {
+                position: fixed;
+                inset: 0;
+                z-index: 100;
+                display: none;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: 14px;
+                padding: 28px;
+                text-align: center;
+                color: #f5f0e8;
+                background: rgba(0,0,0,.94);
+                font: 600 13px/1.6 monospace;
+                letter-spacing: .08em;
+            }
+            #mobileRotateNotice .rotate-icon { font-size: 46px; line-height: 1; }
+            #mobileRotateNotice strong { color: #d8b467; font-size: 16px; }
+            #mobileRotateNotice button, #mobileFullscreen {
+                min-width: 48px;
+                min-height: 48px;
+                border: 1px solid rgba(216,180,103,.7);
+                border-radius: 4px;
+                color: #f5e8cb;
+                background: rgba(30,23,14,.96);
+                font: 600 12px monospace;
+                touch-action: manipulation;
+            }
+            #mobileFullscreen {
+                position: fixed;
+                z-index: 90;
+                right: max(10px, env(safe-area-inset-right));
+                bottom: max(10px, env(safe-area-inset-bottom));
+                display: none;
+                width: 48px;
+                padding: 0;
+                font-size: 22px;
+            }
+            @media (orientation: portrait) {
+                #mobileRotateNotice { display: flex; }
+                #mobileFullscreen { display: none; }
+            }
+            @media (orientation: landscape) {
+                #mobileFullscreen { display: block; }
+            }
+        }
     </style>
 </head>
 
@@ -192,7 +271,15 @@
     <div class="glitch"></div>
     <img src="resources/vignette.png" class="vignette">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-</body>
+
+    <div id="mobileRotateNotice" role="status" aria-live="polite">
+        <div class="rotate-icon" aria-hidden="true">↻</div>
+        <strong>GIRA EL MÓVIL</strong>
+        <span>Este juego está diseñado para jugarse en horizontal. Gira el dispositivo para aprovechar toda la pantalla.</span>
+        <button id="mobileRotateFullscreen" type="button">PANTALLA COMPLETA</button>
+    </div>
+    <button id="mobileFullscreen" type="button" aria-label="Activar pantalla completa" title="Pantalla completa">⛶</button>
+\n</body>
 <!--Made by irv77-->
 <script>
     const parts = 20;
@@ -201,12 +288,6 @@
     runtimecanvas = "resources/fnafsl.cch";
     // Prevents touchscreen move
     window.addEventListener("scroll", preventMotion, false);
-    window.addEventListener("touchmove", preventMotion, false);
-    function preventMotion(event) {
-        window.scrollTo(0, 0);
-        event.preventDefault();
-        event.stopPropagation();
-    }
     // Fullscreen Key
     const pressedKeys = {};
     document.addEventListener('keydown', event => {
@@ -311,7 +392,7 @@
             script.onload = () => {
                 try {
                     new Runtime("MMFCanvas", runtimecanvas);
-                    document.getElementById('MMFCanvas').style.display = 'block';
+                    document.getElementById('MMFCanvas').style.display = 'block';\n                    window.fitMobileCanvas?.();
                     document.getElementById('selection').style.display = 'none';
                     document.title = gametitle;
                 } catch (error) {
@@ -398,4 +479,50 @@
         });
     };
 </script>
-</html>
+
+<script>
+(function () {
+    const canvas = document.getElementById('MMFCanvas');
+    const mobile = window.matchMedia('(max-width: 700px), (pointer: coarse)');
+    if (!canvas) return;
+
+    function fitMobileCanvas() {
+        if (!mobile.matches || canvas.style.display === 'none') return;
+        const viewport = window.visualViewport;
+        const viewportWidth = viewport ? viewport.width : window.innerWidth;
+        const viewportHeight = viewport ? viewport.height : window.innerHeight;
+        const safe = getComputedStyle(document.body);
+        const horizontal = (parseFloat(safe.paddingLeft) || 0) + (parseFloat(safe.paddingRight) || 0);
+        const vertical = (parseFloat(safe.paddingTop) || 0) + (parseFloat(safe.paddingBottom) || 0);
+        const availableWidth = Math.max(1, viewportWidth - horizontal);
+        const availableHeight = Math.max(1, viewportHeight - vertical);
+        const scale = Math.min(availableWidth / canvas.width, availableHeight / canvas.height);
+        canvas.style.width = Math.floor(canvas.width * scale) + 'px';
+        canvas.style.height = Math.floor(canvas.height * scale) + 'px';
+    }
+
+    window.fitMobileCanvas = fitMobileCanvas;
+    window.addEventListener('resize', fitMobileCanvas, { passive: true });
+    window.addEventListener('orientationchange', fitMobileCanvas, { passive: true });
+    if (window.visualViewport) window.visualViewport.addEventListener('resize', fitMobileCanvas, { passive: true });
+    document.addEventListener('fullscreenchange', fitMobileCanvas);
+
+    async function enterFullscreen() {
+        try {
+            if (!document.fullscreenElement && document.documentElement.requestFullscreen) {
+                await document.documentElement.requestFullscreen();
+            }
+            if (screen.orientation && screen.orientation.lock) {
+                try { await screen.orientation.lock('landscape'); } catch (_) {}
+            }
+        } catch (_) {}
+        fitMobileCanvas();
+    }
+
+    const full = document.getElementById('mobileFullscreen');
+    const rotateFull = document.getElementById('mobileRotateFullscreen');
+    if (full) full.addEventListener('click', enterFullscreen);
+    if (rotateFull) rotateFull.addEventListener('click', enterFullscreen);
+})();
+</script>
+\n</html>
