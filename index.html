@@ -75,6 +75,7 @@
     .dialog-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:20px;flex-wrap:wrap}
     .action{padding:10px 14px;border:1px solid var(--line);border-radius:3px;background:transparent;color:#b8a582;font:10px "IBM Plex Mono",monospace;cursor:pointer;text-decoration:none}
     .action:hover{border-color:var(--gold);color:var(--cream)}
+    .control:focus-visible,.filter-btn:focus-visible,.action:focus-visible,.favorite-toggle:focus-visible,.game-search:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
     .launch{background:var(--gold);color:#0a0806;font-weight:700;border-color:var(--gold)}
     .launch:hover{background:#e8c67a;color:#0a0806}
 
@@ -109,6 +110,7 @@
     <i class="rivet tl"></i><i class="rivet tr"></i><i class="rivet bl"></i><i class="rivet br"></i>
     <div class="topbar">
       <div class="top-left"><span class="sys">SYS.OS v19.87</span><span>UNIDAD: GUARDIA NOCTURNO // OFICINA ESTE</span></div>
+      <div class="top-right"><span class="sys">BUILD // 2026.11</span><span>8 ARCHIVOS DISPONIBLES</span></div>
     </div>
     <header>
       <p class="eyebrow">FREDDY FAZBEAR'S PIZZA • EST. 1987</p>
@@ -126,7 +128,7 @@
     </div>
     <div class="archive-tools" role="search">
       <div class="search-wrap"><input class="game-search" id="game-search" type="search" placeholder="BUSCAR EN ARCHIVOS..." autocomplete="off" aria-label="Buscar juegos"></div>
-      <button class="filter-btn" id="favorites-filter" type="button" aria-pressed="false">☆ FAVORITOS</button>
+      <button class="filter-btn" id="favorites-filter" type="button" aria-pressed="false" aria-controls="games-grid">☆ FAVORITOS</button>
       <span class="results-count mono" id="results-count" aria-live="polite">08 / 08</span>
     </div>
     <section class="games" id="games-grid" aria-label="Archivos de juegos disponibles">
@@ -158,7 +160,7 @@
     <footer><span class="rec">● REC &nbsp; CAM 01 • MAIN MENU</span><span class="disclaimer">Fan-made collection. Not affiliated with the official FNAF franchise.</span></footer>
   </main>
 
-  <div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+  <div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" aria-describedby="modal-desc">
     <div class="dialog">
       <div class="dialog-top"><span><span class="beacon" style="display:inline-block;margin-right:8px"></span><span id="modal-archive">ARCHIVO 01 • 1993</span></span><span id="modal-cam">FEED // CAM-01</span></div>
       <h2 id="modal-title">Five Nights at Freddy's</h2><p class="dialog-sub" id="modal-subtitle">The original night shift</p>
@@ -189,7 +191,17 @@
       function closeModal(){modal.classList.remove('open');if(previousFocus)previousFocus.focus();}
       cancel.addEventListener('click',closeModal);
       modal.addEventListener('click',e=>{if(e.target===modal)closeModal();});
-      document.addEventListener('keydown',e=>{if(e.key==='Escape'&&modal.classList.contains('open'))closeModal();});
+      document.addEventListener('keydown',e=>{
+        if(!modal.classList.contains('open'))return;
+        if(e.key==='Escape'){e.preventDefault();closeModal();return;}
+        if(e.key!=='Tab')return;
+        const focusable=[...modal.querySelectorAll('a[href],button:not([disabled]),[tabindex]:not([tabindex="-1"])')];
+        if(!focusable.length)return;
+        const first=focusable[0],last=focusable[focusable.length-1];
+        if(!modal.contains(document.activeElement)){e.preventDefault();first.focus();return;}
+        if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}
+        else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}
+      });
 
       const grid=document.getElementById('games-grid');
       const search=document.getElementById('game-search');

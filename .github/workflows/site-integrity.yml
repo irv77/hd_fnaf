@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   check-site:
-    name: Check menu and game assets
+    name: Check menu, loaders and game assets
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -19,40 +19,67 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Validate all game entry points and archive parts
+      - name: Validate menu, all game entry points and archive parts
         run: |
           node --input-type=module <<'NODE'
-          import { existsSync, readFileSync } from 'node:fs';
+          import { existsSync, readFileSync, statSync } from 'node:fs';
 
           const games = ['1', '2', '3', '4', 'ps', 'sl', 'ucn', 'w'];
           const menu = readFileSync('index.html', 'utf8');
+          const readme = readFileSync('README.md', 'utf8');
+          const vercel = JSON.parse(readFileSync('vercel.json', 'utf8'));
+
+          if (!readme.includes('Producto fan-made, no oficial.')) {
+            throw new Error('README is missing the fan-made disclaimer');
+          }
+          if (!Array.isArray(vercel.headers) || vercel.headers.length === 0) {
+            throw new Error('Vercel response headers are missing');
+          }
 
           for (const game of games) {
-            if (!menu.includes(`href="./${game}/"`)) {
-              throw new Error(`The main menu is missing the ${game} game link`);
+            if (!menu.includes('data-href="./' + game + '/"')) {
+              throw new Error('The main menu is missing the ' + game + ' game link');
             }
 
-            const htmlPath = `${game}/index.html`;
-            if (!existsSync(htmlPath)) throw new Error(`Missing ${htmlPath}`);
+            const htmlPath = game + '/index.html';
+            if (!existsSync(htmlPath)) throw new Error('Missing ' + htmlPath);
 
             const html = readFileSync(htmlPath, 'utf8');
             if (!html.includes('const parts = 20;')) {
-              throw new Error(`${htmlPath}: expected 20 archive parts`);
+              throw new Error(htmlPath + ': expected 20 archive parts');
             }
             if (!html.includes('const workerCount = Math.min(4, fileParts.length);')) {
-              throw new Error(`${htmlPath}: parallel archive loader is missing`);
+              throw new Error(htmlPath + ': parallel archive loader is missing');
+            }
+            if (!html.includes('max-width: min(100vw, 1280px)') ||
+                !html.includes('max-height: min(100vh, 720px)')) {
+              throw new Error(htmlPath + ': 720p display cap is missing');
+            }
+            if (!html.includes('await response.arrayBuffer()')) {
+              throw new Error(htmlPath + ': optimized archive extraction is missing');
+            }
+
+            for (let part = 1; part <= 20; part++) {
+              const asset = game + '/src/resources.zip.part' + part;
+              if (!existsSync(asset)) throw new Error('Missing archive part: ' + asset);
+              if (statSync(asset).size === 0) throw new Error('Empty archive part: ' + asset);
             }
 
             for (const asset of [
-              `${game}/src/Runtime.js`,
-              `${game}/src/resources.zip.part1`,
-              `${game}/src/resources.zip.part20`,
+              game + '/src/Runtime.js',
+              game + '/favicon.ico',
+              game + '/resources/office.png',
+              game + '/resources/animatronic.png',
             ]) {
-              if (!existsSync(asset)) throw new Error(`Missing required game asset: ${asset}`);
+              if (!existsSync(asset)) throw new Error('Missing required game asset: ' + asset);
             }
 
-            console.log(`OK: game ${game}`);
+            const inlineScripts = [...html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/gi)]
+              .map(match => match[1]).filter(script => script.trim());
+            for (const script of inlineScripts) new Function(script);
+
+            console.log('OK: game ' + game);
           }
 
-          console.log('All 8 games and their required archive files are present.');
+          console.log('All 8 games, 160 archive parts, loaders and menu links passed integrity checks.');
           NODE

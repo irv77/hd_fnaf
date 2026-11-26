@@ -75,6 +75,10 @@
         canvas {
             display: none;
             user-select: none;
+            max-width: min(100vw, 1280px);
+            max-height: min(100vh, 720px);
+            width: auto;
+            height: auto;
         }
 
         #title {
@@ -176,9 +180,9 @@
 
         function updateProgress(text, percent) {
             document.title = percent + '% ' + gametitle
-            document.getElementById('percentage').innerHTML = percent + '%';
+            document.getElementById('percentage').textContent = percent + '%';
             document.getElementById('bar').style.width = percent + '%';
-            document.getElementById('stage').innerHTML = text;
+            document.getElementById('stage').textContent = text;
         }
 
         async function intercept() {
@@ -227,26 +231,17 @@
         }
 
         async function extract() {
-            const res = await fetch("resources.zip");
+            if (!window.JSZip) throw new Error("The ZIP library could not be loaded.");
+            const response = await fetch("resources.zip");
+            if (!response.ok) throw new Error("The resources archive could not be downloaded.");
 
-            const contentLength = res.headers.get("Content-Length");
-            const total = parseInt(contentLength, 10);
-            const reader = res.body.getReader();
-            let loaded = 0;
-            const chunks = [];
-
-            while (true) {
-                const { done, value } = await reader.read();
-                if (done) break;
-                chunks.push(value);
-                loaded += value.length;
-                updateProgress('RETURNING GEARS...', Math.floor((loaded / total / 2) * 100));
-            }
-
-            const arrayBuffer = await new Blob(chunks).arrayBuffer();
+            // Read the merged archive once instead of retaining a second chunks array.
+            const arrayBuffer = await response.arrayBuffer();
+            updateProgress('RETURNING GEARS...', 50);
             const zip = await JSZip.loadAsync(arrayBuffer);
             const files = Object.keys(zip.files).filter(name => !zip.files[name].dir);
             const totalFiles = files.length;
+            if (!totalFiles) throw new Error("The resources archive is empty.");
 
             for (let i = 0; i < totalFiles; i++) {
                 const file = zip.files[files[i]];
@@ -257,18 +252,30 @@
             }
         }
 
-        async function wedone() {
-            await extract();
+        async function wedone(resourcesUrl) {
+            try {
+                await extract();
+            } finally {
+                // The merged ZIP is no longer needed once JSZip has read it.
+                URL.revokeObjectURL(resourcesUrl);
+            }
             await intercept();
 
             const script = document.createElement('script');
             script.src = 'src/Runtime.js';
             script.onload = () => {
-                new Runtime("MMFCanvas", runtimecanvas);
+                try {
+                    new Runtime("MMFCanvas", runtimecanvas);
+                    document.getElementById('MMFCanvas').style.display = 'block';
+                    document.getElementById('selection').style.display = 'none';
+                    document.title = gametitle;
+                } catch (error) {
+                    document.getElementById('stage').textContent = "ERROR: " + error.message;
+                }
             };
-            document.getElementById('MMFCanvas').style.display = 'block';
-            document.getElementById('selection').style.display = 'none';
-            document.title = gametitle;
+            script.onerror = () => {
+                document.getElementById('stage').textContent = "ERROR: Runtime.js could not be loaded.";
+            };
             document.head.appendChild(script);
         }
 
@@ -310,6 +317,7 @@
                         );
 
                         const mergedBlob = new Blob(buffers);
+                        buffers.length = 0;
                         resolve(URL.createObjectURL(mergedBlob));
                     } catch (error) {
                         document.getElementById('stage').textContent = "ERROR: " + error.message;
@@ -330,15 +338,18 @@
         }
         Promise.all([
             mergeFiles(getParts("src/resources.zip", 1, parts))
-        ]).then(([resources]) => {
+        ]).then(async ([resources]) => {
             window.fetch = async function (url, ...args) {
-                if (url.endsWith("resources.zip")) {
+                if (typeof url === "string" && url.endsWith("resources.zip")) {
                     return originalFetch(resources, ...args);
-                } else {
-                    return originalFetch(url, ...args);
                 }
+                return originalFetch(url, ...args);
             };
-            wedone();
+            await wedone(resources);
+        }).catch(error => {
+            const stage = document.getElementById('stage');
+            if (stage) stage.textContent = "ERROR: " + error.message;
+            document.title = "ERROR // " + gametitle;
         });
     };
 </script>
