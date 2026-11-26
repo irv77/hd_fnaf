@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Five Nights at Freddy's 3</title>
     <link rel="icon" href="favicon.ico" />
     <style>
@@ -75,6 +75,10 @@
         canvas {
             display: none;
             user-select: none;
+            max-width: min(100vw, 1280px);
+            max-height: min(100vh, 720px);
+            width: auto;
+            height: auto;
         }
 
         #title {
@@ -123,6 +127,130 @@
             margin: 1vh 0;
             font-size: 1.4vw;
         }
+    
+        /* Mobile display: preserve the original game canvas and its aspect ratio. */
+        @media (max-width: 700px), (pointer: coarse) {
+            html, body {
+                width: 100%;
+                height: 100%;
+                min-height: 100%;
+                overflow: hidden;
+            }
+            body {
+                height: 100dvh;
+                min-height: 100dvh;
+                padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+            }
+            canvas {
+                max-width: min(100vw, 1280px);
+                max-height: min(100dvh, 720px);
+                width: auto;
+                height: auto;
+                touch-action: none;
+            }
+            .selection { min-height: 100dvh; }
+            #title {
+                top: 7vh;
+                left: 5vw;
+                height: 15vh;
+                max-width: 55vw;
+                object-fit: contain;
+            }
+            #animatronic {
+                top: 5vh;
+                right: -8vw;
+                height: 75vh;
+                max-width: 65vw;
+                object-fit: contain;
+            }
+            .loader {
+                bottom: max(10vh, calc(env(safe-area-inset-bottom) + 24px));
+                width: 90vw;
+            }
+            .loader h1 { font-size: clamp(28px, 9vw, 54px); }
+            .loader h2 { font-size: clamp(11px, 3vw, 16px); }
+            .glitch, .vignette { height: 100dvh; }
+            .launcher-text img { width: min(65vw, 320px) !important; }
+        }
+    
+        /* Real mobile play layout: fit the native game canvas to the usable viewport. */
+        @media (max-width: 700px), (pointer: coarse) {
+            html, body {
+                width: 100%;
+                height: 100%;
+                min-height: 100%;
+                margin: 0;
+                overflow: hidden;
+            }
+            body {
+                width: 100vw;
+                height: 100dvh;
+                min-height: 100dvh;
+                box-sizing: border-box;
+                padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                overscroll-behavior: none;
+            }
+            canvas#MMFCanvas {
+                display: none;
+                max-width: none;
+                max-height: none;
+                width: auto;
+                height: auto;
+                flex: none;
+                touch-action: none;
+                -webkit-tap-highlight-color: transparent;
+            }
+            .selection { min-height: 100dvh; }
+            .glitch, .vignette { height: 100dvh; }
+            #mobileRotateNotice {
+                position: fixed;
+                inset: 0;
+                z-index: 100;
+                display: none;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: 14px;
+                padding: 28px;
+                text-align: center;
+                color: #f5f0e8;
+                background: rgba(0,0,0,.94);
+                font: 600 13px/1.6 monospace;
+                letter-spacing: .08em;
+            }
+            #mobileRotateNotice .rotate-icon { font-size: 46px; line-height: 1; }
+            #mobileRotateNotice strong { color: #d8b467; font-size: 16px; }
+            #mobileRotateNotice button, #mobileFullscreen {
+                min-width: 48px;
+                min-height: 48px;
+                border: 1px solid rgba(216,180,103,.7);
+                border-radius: 4px;
+                color: #f5e8cb;
+                background: rgba(30,23,14,.96);
+                font: 600 12px monospace;
+                touch-action: manipulation;
+            }
+            #mobileFullscreen {
+                position: fixed;
+                z-index: 90;
+                right: max(10px, env(safe-area-inset-right));
+                bottom: max(10px, env(safe-area-inset-bottom));
+                display: none;
+                width: 48px;
+                padding: 0;
+                font-size: 22px;
+            }
+            @media (orientation: portrait) {
+                #mobileRotateNotice { display: flex; }
+                #mobileFullscreen { display: none; }
+            }
+            @media (orientation: landscape) {
+                #mobileFullscreen { display: block; }
+            }
+        }
     </style>
 </head>
 
@@ -143,6 +271,14 @@
     <div class="glitch"></div>
     <img src="resources/vignette.png" class="vignette">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+    <div id="mobileRotateNotice" role="status" aria-live="polite">
+        <div class="rotate-icon" aria-hidden="true">↻</div>
+        <strong>GIRA EL MÓVIL</strong>
+        <span>Este juego está diseñado para jugarse en horizontal. Gira el dispositivo para aprovechar toda la pantalla.</span>
+        <button id="mobileRotateFullscreen" type="button">PANTALLA COMPLETA</button>
+    </div>
+    <button id="mobileFullscreen" type="button" aria-label="Activar pantalla completa" title="Pantalla completa">⛶</button>
 </body>
 <!--Made by irv77-->
 <script>
@@ -151,13 +287,6 @@
     gametitle = document.title;
     runtimecanvas = "resources/fnaf 3.cch";
     // Prevents touchscreen move
-    window.addEventListener("scroll", preventMotion, false);
-    window.addEventListener("touchmove", preventMotion, false);
-    function preventMotion(event) {
-        window.scrollTo(0, 0);
-        event.preventDefault();
-        event.stopPropagation();
-    }
     // Fullscreen Key
     const pressedKeys = {};
     document.addEventListener('keydown', event => {
@@ -176,9 +305,9 @@
 
         function updateProgress(text, percent) {
             document.title = percent + '% ' + gametitle
-            document.getElementById('percentage').innerHTML = percent + '%';
+            document.getElementById('percentage').textContent = percent + '%';
             document.getElementById('bar').style.width = percent + '%';
-            document.getElementById('stage').innerHTML = text;
+            document.getElementById('stage').textContent = text;
         }
 
         async function intercept() {
@@ -227,26 +356,17 @@
         }
 
         async function extract() {
-            const res = await fetch("resources.zip");
+            if (!window.JSZip) throw new Error("The ZIP library could not be loaded.");
+            const response = await fetch("resources.zip");
+            if (!response.ok) throw new Error("The resources archive could not be downloaded.");
 
-            const contentLength = res.headers.get("Content-Length");
-            const total = parseInt(contentLength, 10);
-            const reader = res.body.getReader();
-            let loaded = 0;
-            const chunks = [];
-
-            while (true) {
-                const { done, value } = await reader.read();
-                if (done) break;
-                chunks.push(value);
-                loaded += value.length;
-                updateProgress('RETURNING GEARS...', Math.floor((loaded / total / 2) * 100));
-            }
-
-            const arrayBuffer = await new Blob(chunks).arrayBuffer();
+            // Read the merged archive once instead of retaining a second chunks array.
+            const arrayBuffer = await response.arrayBuffer();
+            updateProgress('RETURNING GEARS...', 50);
             const zip = await JSZip.loadAsync(arrayBuffer);
             const files = Object.keys(zip.files).filter(name => !zip.files[name].dir);
             const totalFiles = files.length;
+            if (!totalFiles) throw new Error("The resources archive is empty.");
 
             for (let i = 0; i < totalFiles; i++) {
                 const file = zip.files[files[i]];
@@ -257,18 +377,31 @@
             }
         }
 
-        async function wedone() {
-            await extract();
+        async function wedone(resourcesUrl) {
+            try {
+                await extract();
+            } finally {
+                // The merged ZIP is no longer needed once JSZip has read it.
+                URL.revokeObjectURL(resourcesUrl);
+            }
             await intercept();
 
             const script = document.createElement('script');
             script.src = 'src/Runtime.js';
             script.onload = () => {
-                new Runtime("MMFCanvas", runtimecanvas);
+                try {
+                    new Runtime("MMFCanvas", runtimecanvas);
+                    document.getElementById('MMFCanvas').style.display = 'block';
+                    window.fitMobileCanvas?.();
+                    document.getElementById('selection').style.display = 'none';
+                    document.title = gametitle;
+                } catch (error) {
+                    document.getElementById('stage').textContent = "ERROR: " + error.message;
+                }
             };
-            document.getElementById('MMFCanvas').style.display = 'block';
-            document.getElementById('selection').style.display = 'none';
-            document.title = gametitle;
+            script.onerror = () => {
+                document.getElementById('stage').textContent = "ERROR: Runtime.js could not be loaded.";
+            };
             document.head.appendChild(script);
         }
 
@@ -276,39 +409,49 @@
 
         function mergeFiles(fileParts) {
             return new Promise((resolve, reject) => {
-                let buffers = [];
-                let totalSize = 0;
-                let loadedSize = 0;
-                Promise.all(fileParts.map(part =>
-                    fetch(part, { method: 'HEAD' }).then(res => {
-                        try {
-                            if (!res.ok) throw new Error("Missing part: " + part);
-                            return parseInt(res.headers.get("Content-Length") || "0", 10);
-                        } catch (error) { document.getElementById('stage').innerHTML = "ERROR: MISSING FILE(S)..." }
-                    })
-                )).then(sizes => {
-                    totalSize = sizes.reduce((a, b) => a + b, 0);
-                    function fetchPart(index) {
-                        if (index >= fileParts.length) {
-                            let mergedBlob = new Blob(buffers);
-                            let mergedFileUrl = URL.createObjectURL(mergedBlob);
-                            resolve(mergedFileUrl);
-                            return;
+                const buffers = [];
+
+                async function fetchParts() {
+                    try {
+                        // Descarga hasta cuatro fragmentos a la vez sin cambiar su orden.
+                        // Esto reduce la espera de red y limita el uso de memoria.
+                        const workerCount = Math.min(4, fileParts.length);
+                        let nextPart = 0;
+                        let completedParts = 0;
+
+                        async function worker() {
+                            while (true) {
+                                const index = nextPart++;
+                                if (index >= fileParts.length) return;
+
+                                const response = await fetch(fileParts[index]);
+                                if (!response.ok) {
+                                    throw new Error("Missing part: " + fileParts[index]);
+                                }
+
+                                buffers[index] = await response.arrayBuffer();
+                                completedParts++;
+                                updateProgress(
+                                    'LOCATING ARCHIVE...',
+                                    Math.floor((completedParts / fileParts.length / 2) * 100)
+                                );
+                            }
                         }
 
-                        fetch(fileParts[index]).then((response) => {
-                            if (!response.ok) throw new Error("Missing part: " + fileParts[index]);
-                            return response.arrayBuffer();
-                        }).then((data) => {
-                            buffers.push(data);
-                            loadedSize += data.byteLength;
-                            updateProgress('LOCATING ARCHIVE...', Math.floor((loadedSize / totalSize / 2) * 100));
-                            fetchPart(index + 1);
-                        }).catch(reject);
-                    }
+                        await Promise.all(
+                            Array.from({ length: workerCount }, () => worker())
+                        );
 
-                    fetchPart(0);
-                }).catch(reject);
+                        const mergedBlob = new Blob(buffers);
+                        buffers.length = 0;
+                        resolve(URL.createObjectURL(mergedBlob));
+                    } catch (error) {
+                        document.getElementById('stage').textContent = "ERROR: " + error.message;
+                        reject(error);
+                    }
+                }
+
+                fetchParts();
             });
         }
 
@@ -321,16 +464,65 @@
         }
         Promise.all([
             mergeFiles(getParts("src/resources.zip", 1, parts))
-        ]).then(([resources]) => {
+        ]).then(async ([resources]) => {
             window.fetch = async function (url, ...args) {
-                if (url.endsWith("resources.zip")) {
+                if (typeof url === "string" && url.endsWith("resources.zip")) {
                     return originalFetch(resources, ...args);
-                } else {
-                    return originalFetch(url, ...args);
                 }
+                return originalFetch(url, ...args);
             };
-            wedone();
+            await wedone(resources);
+        }).catch(error => {
+            const stage = document.getElementById('stage');
+            if (stage) stage.textContent = "ERROR: " + error.message;
+            document.title = "ERROR // " + gametitle;
         });
     };
+</script>
+
+<script>
+(function () {
+    const canvas = document.getElementById('MMFCanvas');
+    const mobile = window.matchMedia('(max-width: 700px), (pointer: coarse)');
+    if (!canvas) return;
+
+    function fitMobileCanvas() {
+        if (!mobile.matches || canvas.style.display === 'none') return;
+        const viewport = window.visualViewport;
+        const viewportWidth = viewport ? viewport.width : window.innerWidth;
+        const viewportHeight = viewport ? viewport.height : window.innerHeight;
+        const safe = getComputedStyle(document.body);
+        const horizontal = (parseFloat(safe.paddingLeft) || 0) + (parseFloat(safe.paddingRight) || 0);
+        const vertical = (parseFloat(safe.paddingTop) || 0) + (parseFloat(safe.paddingBottom) || 0);
+        const availableWidth = Math.max(1, viewportWidth - horizontal);
+        const availableHeight = Math.max(1, viewportHeight - vertical);
+        const scale = Math.min(availableWidth / canvas.width, availableHeight / canvas.height);
+        canvas.style.width = Math.floor(canvas.width * scale) + 'px';
+        canvas.style.height = Math.floor(canvas.height * scale) + 'px';
+    }
+
+    window.fitMobileCanvas = fitMobileCanvas;
+    window.addEventListener('resize', fitMobileCanvas, { passive: true });
+    window.addEventListener('orientationchange', fitMobileCanvas, { passive: true });
+    if (window.visualViewport) window.visualViewport.addEventListener('resize', fitMobileCanvas, { passive: true });
+    document.addEventListener('fullscreenchange', fitMobileCanvas);
+
+    async function enterFullscreen() {
+        try {
+            if (!document.fullscreenElement && document.documentElement.requestFullscreen) {
+                await document.documentElement.requestFullscreen();
+            }
+            if (screen.orientation && screen.orientation.lock) {
+                try { await screen.orientation.lock('landscape'); } catch (_) {}
+            }
+        } catch (_) {}
+        fitMobileCanvas();
+    }
+
+    const full = document.getElementById('mobileFullscreen');
+    const rotateFull = document.getElementById('mobileRotateFullscreen');
+    if (full) full.addEventListener('click', enterFullscreen);
+    if (rotateFull) rotateFull.addEventListener('click', enterFullscreen);
+})();
 </script>
 </html>

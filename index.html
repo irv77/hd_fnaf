@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#080705">
+  <meta name="description" content="Terminal de seguridad de Freddy Fazbear's Pizza. Selecciona uno de los ocho juegos de FNAF.">
+  <link rel="icon" href="/favicon.ico?v=2" sizes="any">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Antonio:wght@600;700&family=IBM+Plex+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <title>Freddy Fazbear's Pizza | Security Terminal</title>
+  <style>
+    :root{color-scheme:dark;--bg:#080705;--panel:#100d09;--gold:#d8b467;--muted:#8c7343;--line:rgba(216,180,103,.25);--cream:#f3e8d2;--red:#ff3434}
+    *{box-sizing:border-box}
+    body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 50% 0%,rgba(216,180,103,.10),transparent 62%),radial-gradient(circle at 50% 50%,#100d09,#050403 85%);color:var(--cream);font-family:Inter,Arial,sans-serif;display:flex;align-items:center;justify-content:center;padding:14px;overflow-x:hidden}
+    body:before{content:"";position:fixed;inset:0;pointer-events:none;z-index:30;opacity:.16;background:radial-gradient(ellipse at center,transparent 45%,#000 100%)}
+    .scanlines{position:fixed;inset:0;z-index:31;pointer-events:none;opacity:.48;background:linear-gradient(rgba(18,16,16,0) 50%,rgba(0,0,0,.32) 50%);background-size:100% 4px;transition:opacity .2s}
+    .sweep{position:fixed;left:0;top:-130px;width:100%;height:100px;z-index:29;pointer-events:none;background:linear-gradient(transparent,rgba(216,180,103,.045),transparent);animation:sweep 8s linear infinite}
+    @keyframes sweep{to{transform:translateY(calc(100vh + 160px))}}
+    @keyframes pulse{50%{opacity:.28;box-shadow:0 0 2px var(--red)}}
+    @keyframes flicker{0%,96%,100%{opacity:1}97%{opacity:.88}98%{opacity:.98}}
+    .terminal{width:min(1180px,100%);position:relative;z-index:2;background:linear-gradient(180deg,rgba(16,13,9,.97),rgba(8,7,5,.98));border:1px solid var(--line);border-radius:5px;padding:clamp(17px,2.4vw,30px);box-shadow:0 0 0 1px #000,0 25px 70px #000,inset 0 0 60px rgba(216,180,103,.04);animation:flicker 10s infinite}
+    .rivet{position:absolute;width:12px;height:12px;border:1px solid rgba(216,180,103,.45);border-radius:50%;background:radial-gradient(circle at 35% 35%,#332817,#0b0906);box-shadow:inset 0 1px 2px #000}
+    .rivet:after{content:"";position:absolute;left:2px;right:2px;top:5px;height:1px;background:rgba(216,180,103,.5);transform:rotate(-35deg)}
+    .tl{top:10px;left:10px}.tr{top:10px;right:10px}.bl{bottom:10px;left:10px}.br{bottom:10px;right:10px}
+    .mono{font-family:"IBM Plex Mono",monospace}
+    .topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:3px 0 13px;border-bottom:1px solid rgba(216,180,103,.15);color:#9d8350;font:10px "IBM Plex Mono",monospace;letter-spacing:.06em}
+    .top-left,.top-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+    .sys{padding:4px 8px;color:var(--gold);background:rgba(216,180,103,.09);border:1px solid var(--line);border-radius:3px}
+    .control{border:1px solid var(--line);background:rgba(216,180,103,.06);color:#c5a667;padding:6px 9px;border-radius:3px;font:10px "IBM Plex Mono",monospace;cursor:pointer;transition:.12s ease-out}
+    .control:hover,.control.active{background:rgba(216,180,103,.16);border-color:var(--gold);color:var(--cream)}
+    header{text-align:center;padding:20px 8px 23px}
+    .eyebrow{font:600 10px "IBM Plex Mono",monospace;letter-spacing:.26em;color:#c7a35c;margin:0 0 9px}
+    h1{font:700 clamp(42px,7vw,76px)/.9 Antonio,Impact,sans-serif;letter-spacing:.075em;margin:0;color:#f5ebd6;text-shadow:0 2px 18px rgba(243,232,210,.16),0 0 2px rgba(216,180,103,.4)}
+    .title-sub{font:700 clamp(22px,3vw,34px)/1.15 Antonio,Impact,sans-serif;letter-spacing:.22em;color:var(--gold);margin-top:5px}
+    .welcome{margin:16px 0 0;font:600 11px "IBM Plex Mono",monospace;letter-spacing:.13em}
+    .instructions{font-size:12px;color:#b9a98b;margin:6px 0 0}
+    .security{display:inline-flex;align-items:center;gap:10px;margin-top:14px;padding:7px 14px;border:1px solid var(--line);border-radius:30px;background:#18120c;color:var(--gold);font:600 10px "IBM Plex Mono",monospace;letter-spacing:.16em}
+    .beacon{width:7px;height:7px;background:var(--red);border-radius:50%;box-shadow:0 0 10px var(--red);animation:pulse 1.8s infinite}
+    .archive-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:0 0 10px;margin-bottom:12px;border-bottom:1px solid rgba(216,180,103,.15)}
+    .archive-label{font:600 11px "IBM Plex Mono",monospace;letter-spacing:.12em;color:var(--gold)}
+    .telemetry{display:flex;gap:18px;align-items:center;color:#b49b6a;font:10px "IBM Plex Mono",monospace}
+    .power{color:var(--cream);font-weight:700}
+    .bars{display:inline-flex;gap:3px;margin-left:5px;vertical-align:middle}
+    .bars i{display:block;width:5px;height:11px;background:#4ade80}.bars i:last-child{background:#facc15}
+    .games{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+    .card{min-width:0;min-height:125px;position:relative;display:flex;flex-direction:column;justify-content:space-between;text-align:left;padding:13px 15px;background:linear-gradient(135deg,rgba(22,18,13,.96),rgba(12,10,7,.98));border:1px solid rgba(216,180,103,.25);border-radius:4px;color:var(--cream);cursor:pointer;overflow:hidden;transition:transform .12s ease-out,border-color .12s ease-out,box-shadow .12s ease-out,background .12s ease-out;will-change:transform}
+    .card:before,.card:after{content:"";position:absolute;width:8px;height:8px;border-color:var(--gold);border-style:solid;opacity:0;transition:opacity .12s ease-out,transform .12s ease-out;pointer-events:none}
+    .card:before{top:5px;right:5px;border-width:1.5px 1.5px 0 0;transform:translate(3px,-3px)}
+    .card:after{bottom:5px;left:5px;border-width:0 0 1.5px 1.5px;transform:translate(-3px,3px)}
+    .card:hover,.card:focus-visible{outline:none;transform:translateY(-2px) scale(1.015);border-color:rgba(216,180,103,.85);background:linear-gradient(135deg,#241d13,#100d09);box-shadow:0 10px 26px #000,0 0 18px rgba(216,180,103,.14)}
+    .card:hover:before,.card:hover:after,.card:focus-visible:before,.card:focus-visible:after{opacity:.9;transform:translate(0)}
+    .card-top,.card-bottom{display:flex;align-items:center;justify-content:space-between;gap:8px;position:relative;z-index:1}
+    .archive,.cam{font:500 9px "IBM Plex Mono",monospace;letter-spacing:.12em;color:#c8a35a}
+    .cam{color:#7c663c}
+    .card h2{font-size:16px;line-height:1.2;margin:11px 0 4px;font-weight:700;position:relative;z-index:1}
+    .card p{font:10px "IBM Plex Mono",monospace;color:#9c8c72;margin:0;position:relative;z-index:1}
+    .geo{position:absolute;right:-20px;top:50%;width:112px;height:112px;transform:translateY(-50%);border:1px solid rgba(216,180,103,.17);border-radius:50%;opacity:.55;pointer-events:none;box-shadow:0 0 0 12px rgba(216,180,103,.025),0 0 0 25px rgba(216,180,103,.02)}
+    .geo:before,.geo:after{content:"";position:absolute;inset:15px;border:1px dashed rgba(216,180,103,.2);border-radius:50%}
+    .geo:after{inset:33px;border-style:solid}
+    .start{padding-top:7px;border-top:1px solid rgba(216,180,103,.1);font:9px "IBM Plex Mono",monospace;letter-spacing:.1em;color:#8f7547}
+    .arrow{color:var(--gold);font-size:13px}
+    footer{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-top:18px;padding-top:12px;border-top:1px solid rgba(216,180,103,.15);font:10px "IBM Plex Mono",monospace}
+    .rec{color:#c8463e;letter-spacing:.12em}.disclaimer{color:#7e715b;font:11px Inter,sans-serif}
+    .modal{position:fixed;inset:0;z-index:60;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(0,0,0,.86);backdrop-filter:blur(5px)}
+    .modal.open{display:flex}
+    .dialog{width:min(510px,100%);padding:24px;background:#0d0b08;border:1px solid rgba(216,180,103,.65);border-radius:4px;box-shadow:0 0 60px #000}
+    .dialog-top{display:flex;justify-content:space-between;gap:10px;padding-bottom:12px;margin-bottom:17px;border-bottom:1px solid var(--line);font:10px "IBM Plex Mono",monospace;color:var(--gold)}
+    .dialog h2{font:700 32px/1.1 Antonio,sans-serif;margin:0;color:var(--cream);letter-spacing:.04em}
+    .dialog-sub{font:11px "IBM Plex Mono",monospace;color:var(--gold);margin:5px 0 16px}
+    .details{padding:13px;background:#14110c;border:1px solid var(--line);border-radius:3px}
+    .threat{font:600 10px "IBM Plex Mono",monospace;color:#ff5959;margin-bottom:8px}
+    .details p{font-size:12px;line-height:1.6;color:#cbbda4;margin:0}
+    .dialog-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:20px;flex-wrap:wrap}
+    .action{padding:10px 14px;border:1px solid var(--line);border-radius:3px;background:transparent;color:#b8a582;font:10px "IBM Plex Mono",monospace;cursor:pointer;text-decoration:none}
+    .action:hover{border-color:var(--gold);color:var(--cream)}
+    .control:focus-visible,.filter-btn:focus-visible,.action:focus-visible,.favorite-toggle:focus-visible,.game-search:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+    .launch{background:var(--gold);color:#0a0806;font-weight:700;border-color:var(--gold)}
+    .launch:hover{background:#e8c67a;color:#0a0806}
+
+    .archive-tools{display:flex;align-items:center;gap:8px;margin:-2px 0 12px}
+    .search-wrap{position:relative;flex:1;min-width:150px}
+    .search-wrap:before{content:"⌕";position:absolute;left:11px;top:50%;transform:translateY(-54%);color:var(--gold);font-size:18px;pointer-events:none}
+    .game-search{width:100%;height:34px;padding:0 12px 0 31px;background:#0b0906;border:1px solid var(--line);border-radius:3px;color:var(--cream);font:10px "IBM Plex Mono",monospace;outline:none}
+    .game-search::placeholder{color:#796847}
+    .game-search:focus{border-color:var(--gold);box-shadow:0 0 0 2px rgba(216,180,103,.1)}
+    .filter-btn{height:34px;padding:0 12px;border:1px solid var(--line);border-radius:3px;background:rgba(216,180,103,.06);color:#bda16b;font:10px "IBM Plex Mono",monospace;cursor:pointer;white-space:nowrap;transition:.12s}
+    .filter-btn:hover,.filter-btn.active{border-color:var(--gold);background:rgba(216,180,103,.15);color:var(--cream)}
+    .results-count{min-width:48px;text-align:right;color:#8f7952;font:9px "IBM Plex Mono",monospace}
+    .game-entry{position:relative;min-width:0}
+    .game-entry .card{width:100%;height:100%}
+    .favorite-toggle{position:absolute;z-index:4;right:9px;top:34px;width:27px;height:27px;border:1px solid rgba(216,180,103,.22);border-radius:3px;background:rgba(5,4,3,.78);color:#92794c;font-size:16px;line-height:1;cursor:pointer;transition:.12s}
+    .favorite-toggle:hover,.favorite-toggle.is-favorite{color:#f0c66f;border-color:var(--gold);background:#21190e}
+    .favorite-toggle:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+    .empty-state{grid-column:1/-1;padding:24px 12px;text-align:center;border:1px dashed var(--line);color:#9e8963;font:10px "IBM Plex Mono",monospace;letter-spacing:.08em}
+    @media(max-width:560px){.archive-tools{gap:6px;margin-bottom:9px}.filter-btn{padding:0 9px;font-size:9px}.results-count{min-width:38px;font-size:8px}.favorite-toggle{top:31px;right:7px}}
+
+    @media(max-width:850px){.games{grid-template-columns:repeat(2,minmax(0,1fr))}.card{min-height:118px}}
+    @media(max-width:560px){body{padding:8px;align-items:flex-start}.terminal{padding:17px 13px}.topbar{justify-content:center}.top-left{justify-content:center}.top-right{justify-content:center}header{padding:22px 4px 19px}.archive-head{align-items:flex-start}.telemetry{width:100%;justify-content:space-between}.games{grid-template-columns:1fr 1fr;gap:8px}.card{min-height:115px;padding:11px}.card h2{font-size:14px}.archive,.cam{font-size:8px}.start{font-size:8px}footer{justify-content:center;text-align:center}.disclaimer{line-height:1.5}}
+    @media(max-width:370px){.games{grid-template-columns:1fr}.card{min-height:105px}}
+    @media(min-width:900px) and (min-height:700px){.terminal{padding:24px 30px}.card{min-height:132px}header{padding-top:22px;padding-bottom:25px}}
+    @media(min-width:760px) and (max-height:700px){body{padding:7px}.terminal{padding:12px 20px}header{padding:11px 6px 13px}.eyebrow{margin-bottom:5px}h1{font-size:48px}.title-sub{font-size:24px}.welcome{margin-top:8px}.security{margin-top:8px;padding:5px 12px}.archive-head{margin-bottom:8px;padding-bottom:7px}.games{gap:8px}.card{min-height:88px;padding:9px 12px}.card h2{font-size:14px;margin:6px 0 3px}.card p{font-size:9px}.start{padding-top:4px}footer{margin-top:10px;padding-top:8px}}
+
+    /* Mobile terminal layout */
+    @media (max-width: 700px), (pointer: coarse) {
+      body {
+        min-height: 100dvh;
+        padding: max(8px, env(safe-area-inset-top)) max(8px, env(safe-area-inset-right)) max(8px, env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left));
+        align-items: flex-start;
+      }
+      .terminal { width: 100%; padding: 16px 12px; }
+      .topbar { justify-content: center; gap: 8px; }
+      .top-left, .top-right { justify-content: center; text-align: center; }
+      header { padding: 20px 4px 17px; }
+      h1 { font-size: clamp(40px, 12vw, 64px); }
+      .title-sub { font-size: clamp(21px, 6vw, 30px); }
+      .instructions { line-height: 1.5; }
+      .security { max-width: 100%; gap: 7px; padding: 7px 10px; font-size: 9px; letter-spacing: .1em; }
+      .archive-head { align-items: flex-start; }
+      .telemetry { width: 100%; justify-content: space-between; gap: 8px; }
+      .archive-tools { gap: 7px; }
+      .game-search { height: 42px; font-size: 11px; }
+      .filter-btn { height: 42px; padding: 0 10px; }
+      .games { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+      .card { min-height: 132px; padding: 11px 10px; }
+      .card h2 { font-size: clamp(12px, 3.5vw, 15px); line-height: 1.25; }
+      .card p, .start { font-size: 8px; }
+      .favorite-toggle { width: 34px; height: 34px; top: 32px; right: 7px; font-size: 18px; }
+      .dialog { max-height: calc(100dvh - 24px); overflow-y: auto; padding: 20px 16px; }
+      .action, .control, .filter-btn { min-height: 42px; }
+      footer { justify-content: center; text-align: center; }
+    }
+    @media (max-width: 370px) {
+      .games { grid-template-columns: 1fr; }
+      .card { min-height: 112px; }
+    }
+    @media (pointer: coarse) {
+      .card:hover { transform: none; box-shadow: none; }
+      .card:active { border-color: var(--gold); background: linear-gradient(135deg,#241d13,#100d09); }
+      .control, .filter-btn, .favorite-toggle, .action, .card { touch-action: manipulation; }
+    }
+    @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
+  
+    @media (max-width: 700px), (pointer: coarse) {
+      body { padding: max(4px, env(safe-area-inset-top)) max(4px, env(safe-area-inset-right)) max(4px, env(safe-area-inset-bottom)) max(4px, env(safe-area-inset-left)); }
+      .terminal { padding: 12px 10px; }
+      .topbar { padding-bottom: 7px; gap: 5px; font-size: 8px; }
+      .top-right { display: none; }
+      header { padding: 10px 4px 10px; }
+      .eyebrow { margin-bottom: 5px; font-size: 8px; }
+      h1 { font-size: clamp(36px, 11vw, 52px); }
+      .title-sub { margin-top: 3px; font-size: clamp(19px, 5.5vw, 25px); }
+      .welcome { margin-top: 8px; font-size: 9px; }
+      .instructions { margin-top: 4px; font-size: 10px; }
+      .security { margin-top: 8px; padding: 5px 8px; font-size: 8px; }
+      .archive-head { margin-bottom: 8px; padding-bottom: 7px; }
+      .archive-tools { margin-bottom: 8px; }
+      .games { gap: 7px; }
+      .card { min-height: 104px; padding: 9px; }
+      .card h2 { margin: 6px 0 3px; font-size: 13px; }
+      .card p, .start { font-size: 8px; }
+      footer { margin-top: 10px; padding-top: 8px; }
+    }
+    </style>
+</head>
+<body>
+  <div class="scanlines" id="scanlines"></div><div class="sweep"></div>
+  <main class="terminal">
+    <i class="rivet tl"></i><i class="rivet tr"></i><i class="rivet bl"></i><i class="rivet br"></i>
+    <div class="topbar">
+      <div class="top-left"><span class="sys">SYS.OS v19.87</span><span>UNIDAD: GUARDIA NOCTURNO // OFICINA ESTE</span></div>
+      <div class="top-right"><span class="sys">BUILD // 2026.11</span><span>8 ARCHIVOS DISPONIBLES</span></div>
+    </div>
+    <header>
+      <p class="eyebrow">FREDDY FAZBEAR'S PIZZA • EST. 1987</p>
+      <h1>FIVE NIGHTS</h1><div class="title-sub">AT FREDDY'S</div>
+      <p class="welcome">WELCOME BACK, NIGHT GUARD.</p>
+      <p class="instructions">Tu turno empieza a las <strong>12:00 AM</strong>. Intenta llegar a las <strong>6:00 AM</strong>.</p>
+      <div class="security"><span class="beacon"></span>SISTEMA DE SEGURIDAD ACTIVO<span class="beacon"></span></div>
+    </header>
+    <div class="archive-head">
+      <div class="archive-label">▸ NIGHT SHIFT ARCHIVES / SELECCIONA TU TURNO</div>
+      <div class="telemetry">
+        <div>POWER: <span class="power" id="power">99%</span><span class="bars"><i></i><i></i><i></i></span></div>
+        <div id="clock">12:00 AM • NIGHT 1</div>
+      </div>
+    </div>
+    <div class="archive-tools" role="search">
+      <div class="search-wrap"><input class="game-search" id="game-search" type="search" placeholder="BUSCAR EN ARCHIVOS..." autocomplete="off" aria-label="Buscar juegos"></div>
+      <button class="filter-btn" id="favorites-filter" type="button" aria-pressed="false" aria-controls="games-grid">☆ FAVORITOS</button>
+      <span class="results-count mono" id="results-count" aria-live="polite">08 / 08</span>
+    </div>
+    <section class="games" id="games-grid" aria-label="Archivos de juegos disponibles">
+      <button class="card" type="button" data-archive="ARCHIVO 01 • 1993" data-cam="CAM-01" data-title="Five Nights at Freddy's" data-subtitle="The original night shift" data-threat="ALTO // ANIMATRÓNICOS CLÁSICOS" data-desc="Vigila las cámaras de seguridad y controla las puertas del local original de Freddy Fazbear's Pizza. Conserva energía hasta las 6:00 AM." data-href="./1/">
+        <span class="geo"></span><span class="card-top"><span class="archive">ARCHIVO 01 • 1993</span><span class="cam">CAM-01</span></span><span><h2>Five Nights at Freddy's</h2><p>The original night shift</p></span><span class="card-bottom start"><span>[ INICIAR TURNO ]</span><b class="arrow">→</b></span>
+      </button>
+      <button class="card" type="button" data-archive="ARCHIVO 02 • 1987" data-cam="CAM-02" data-title="Five Nights at Freddy's 2" data-subtitle="Grand Reopening" data-threat="CRÍTICO // SIN PUERTAS DE SEGURIDAD" data-desc="La nueva pizzería no tiene puertas que te protejan. Usa la máscara de Freddy y mantén cargada la caja de música de Puppet." data-href="./2/">
+        <span class="geo"></span><span class="card-top"><span class="archive">ARCHIVO 02 • 1987</span><span class="cam">CAM-02</span></span><span><h2>Five Nights at Freddy's 2</h2><p>Grand Reopening</p></span><span class="card-bottom start"><span>[ INICIAR TURNO ]</span><b class="arrow">→</b></span>
+      </button>
+      <button class="card" type="button" data-archive="ARCHIVO 03 • 2023" data-cam="CAM-03" data-title="Five Nights at Freddy's 3" data-subtitle="Fazbear's Fright" data-threat="PELIGRO // UNA AMENAZA DETECTADA" data-desc="Explora Fazbear's Fright, una atracción de terror construida alrededor de las leyendas de Freddy's. Vigila los sistemas y las cámaras." data-href="./3/">
+        <span class="geo"></span><span class="card-top"><span class="archive">ARCHIVO 03 • 2023</span><span class="cam">CAM-03</span></span><span><h2>Five Nights at Freddy's 3</h2><p>Fazbear's Fright</p></span><span class="card-bottom start"><span>[ INICIAR TURNO ]</span><b class="arrow">→</b></span>
+      </button>
+      <button class="card" type="button" data-archive="ARCHIVO 04" data-cam="CAM-04" data-title="Five Nights at Freddy's 4" data-subtitle="The final chapter" data-threat="CRÍTICO // SEÑALES EN EL PASILLO" data-desc="Esta vez no estás en una oficina. Escucha con atención y comprueba los pasillos y las puertas de la habitación." data-href="./4/">
+        <span class="geo"></span><span class="card-top"><span class="archive">ARCHIVO 04</span><span class="cam">CAM-04</span></span><span><h2>Five Nights at Freddy's 4</h2><p>The final chapter</p></span><span class="card-bottom start"><span>[ INICIAR TURNO ]</span><b class="arrow">→</b></span>
+      </button>
+      <button class="card" type="button" data-archive="ARCHIVO 05" data-cam="CAM-05" data-title="Sister Location" data-subtitle="Circus Baby's Entertainment" data-threat="DESCONOCIDO // INSTALACIÓN SUBTERRÁNEA" data-desc="Desciende a Circus Baby's Entertainment and Rental y completa las tareas nocturnas de una instalación llena de secretos." data-href="./sl/">
+        <span class="geo"></span><span class="card-top"><span class="archive">ARCHIVO 05</span><span class="cam">CAM-05</span></span><span><h2>Sister Location</h2><p>Circus Baby's Entertainment</p></span><span class="card-bottom start"><span>[ INICIAR TURNO ]</span><b class="arrow">→</b></span>
+      </button>
+      <button class="card" type="button" data-archive="ARCHIVO 06" data-cam="CAM-06" data-title="Pizzeria Simulator" data-subtitle="A new business opportunity" data-threat="ALERTA // ACTIVIDAD TRAS EL CIERRE" data-desc="Gestiona tu propia pizzería durante el día y sobrevive a las tareas de mantenimiento cuando cae la noche." data-href="./ps/">
+        <span class="geo"></span><span class="card-top"><span class="archive">ARCHIVO 06</span><span class="cam">CAM-06</span></span><span><h2>Pizzeria Simulator</h2><p>A new business opportunity</p></span><span class="card-bottom start"><span>[ INICIAR TURNO ]</span><b class="arrow">→</b></span>
+      </button>
+      <button class="card" type="button" data-archive="ARCHIVO 07" data-cam="CAM-07" data-title="Ultimate Custom Night" data-subtitle="The ultimate challenge" data-threat="MÁXIMO // TODOS LOS SISTEMAS ACTIVOS" data-desc="Configura tu propia noche con una enorme selección de personajes y ajusta el nivel de dificultad." data-href="./ucn/">
+        <span class="geo"></span><span class="card-top"><span class="archive">ARCHIVO 07</span><span class="cam">CAM-07</span></span><span><h2>Ultimate Custom Night</h2><p>The ultimate challenge</p></span><span class="card-bottom start"><span>[ INICIAR TURNO ]</span><b class="arrow">→</b></span>
+      </button>
+      <button class="card" type="button" data-archive="ARCHIVO EXTRA" data-cam="CAM-08" data-title="FNAF World" data-subtitle="A different kind of adventure" data-threat="ANOMALÍA // MODO AVENTURA" data-desc="Una aventura RPG diferente protagonizada por las versiones Adventure de los animatrónicos en el mundo de Animatronica." data-href="./w/">
+        <span class="geo"></span><span class="card-top"><span class="archive">ARCHIVO EXTRA</span><span class="cam">CAM-08</span></span><span><h2>FNAF World</h2><p>A different kind of adventure</p></span><span class="card-bottom start"><span>[ INICIAR TURNO ]</span><b class="arrow">→</b></span>
+      </button>
+    </section>
+    <footer><span class="rec">● REC &nbsp; CAM 01 • MAIN MENU</span><span class="disclaimer">Fan-made collection. Not affiliated with the official FNAF franchise.</span></footer>
+  </main>
+
+  <div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" aria-describedby="modal-desc">
+    <div class="dialog">
+      <div class="dialog-top"><span><span class="beacon" style="display:inline-block;margin-right:8px"></span><span id="modal-archive">ARCHIVO 01 • 1993</span></span><span id="modal-cam">FEED // CAM-01</span></div>
+      <h2 id="modal-title">Five Nights at Freddy's</h2><p class="dialog-sub" id="modal-subtitle">The original night shift</p>
+      <div class="details"><div class="threat" id="modal-threat">ALTO</div><p id="modal-desc"></p></div>
+      <div class="dialog-actions"><button class="action" id="cancel" type="button">[ ESC ] CANCELAR</button><a class="action launch" id="launch" href="./1/">COMENZAR TURNO →</a></div>
+    </div>
+  </div>
+  <script>
+    (() => {
+      const modal=document.getElementById('modal');
+      const launch=document.getElementById('launch');
+      const cancel=document.getElementById('cancel');
+      let previousFocus=null;
+      document.querySelectorAll('.card').forEach(card=>{
+        card.addEventListener('click',()=>{
+          previousFocus=card;
+          document.getElementById('modal-archive').textContent=card.dataset.archive;
+          document.getElementById('modal-cam').textContent='FEED // '+card.dataset.cam;
+          document.getElementById('modal-title').textContent=card.dataset.title;
+          document.getElementById('modal-subtitle').textContent=card.dataset.subtitle;
+          document.getElementById('modal-threat').textContent=card.dataset.threat;
+          document.getElementById('modal-desc').textContent=card.dataset.desc;
+          launch.href=card.dataset.href;
+          modal.classList.add('open');
+          cancel.focus();
+        });
+      });
+      function closeModal(){modal.classList.remove('open');if(previousFocus)previousFocus.focus();}
+      cancel.addEventListener('click',closeModal);
+      modal.addEventListener('click',e=>{if(e.target===modal)closeModal();});
+      document.addEventListener('keydown',e=>{
+        if(!modal.classList.contains('open'))return;
+        if(e.key==='Escape'){e.preventDefault();closeModal();return;}
+        if(e.key!=='Tab')return;
+        const focusable=[...modal.querySelectorAll('a[href],button:not([disabled]),[tabindex]:not([tabindex="-1"])')];
+        if(!focusable.length)return;
+        const first=focusable[0],last=focusable[focusable.length-1];
+        if(!modal.contains(document.activeElement)){e.preventDefault();first.focus();return;}
+        if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}
+        else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}
+      });
+
+      const grid=document.getElementById('games-grid');
+      const search=document.getElementById('game-search');
+      const favoritesFilter=document.getElementById('favorites-filter');
+      const resultsCount=document.getElementById('results-count');
+      const cards=[...grid.querySelectorAll('.card')];
+      const favoriteKey='fazbear-terminal-favorites-v1';
+      let favorites=[];
+      try{favorites=JSON.parse(localStorage.getItem(favoriteKey)||'[]');if(!Array.isArray(favorites))favorites=[];}catch(_){favorites=[];}
+      cards.forEach(card=>{
+        const entry=document.createElement('div');
+        entry.className='game-entry';
+        card.parentNode.insertBefore(entry,card);
+        entry.appendChild(card);
+        const favorite=document.createElement('button');
+        favorite.type='button';
+        favorite.className='favorite-toggle';
+        favorite.setAttribute('aria-label','Añadir '+card.dataset.title+' a favoritos');
+        favorite.setAttribute('aria-pressed','false');
+        favorite.textContent='☆';
+        entry.appendChild(favorite);
+        const syncFavorite=()=>{
+          const active=favorites.includes(card.dataset.href);
+          favorite.classList.toggle('is-favorite',active);
+          favorite.textContent=active?'★':'☆';
+          favorite.setAttribute('aria-pressed',String(active));
+          favorite.setAttribute('aria-label',(active?'Quitar ':'Añadir ')+card.dataset.title+' '+(active?'de':'a')+' favoritos');
+        };
+        syncFavorite();
+        favorite.addEventListener('click',()=>{
+          favorites=favorites.includes(card.dataset.href)?favorites.filter(href=>href!==card.dataset.href):[...favorites,card.dataset.href];
+          try{localStorage.setItem(favoriteKey,JSON.stringify(favorites));}catch(_){}
+          syncFavorite();
+          renderCards();
+        });
+      });
+      let favoritesOnly=false;
+      function renderCards(){
+        const query=search.value.trim().toLocaleLowerCase('es');
+        let visible=0;
+        cards.forEach(card=>{
+          const entry=card.closest('.game-entry');
+          const matchesText=[card.dataset.title,card.dataset.subtitle,card.dataset.archive].join(' ').toLocaleLowerCase('es').includes(query);
+          const matchesFavorite=!favoritesOnly||favorites.includes(card.dataset.href);
+          const show=matchesText&&matchesFavorite;
+          entry.hidden=!show;
+          if(show)visible++;
+        });
+        resultsCount.textContent=String(visible).padStart(2,'0')+' / '+String(cards.length).padStart(2,'0');
+        let empty=grid.querySelector('.empty-state');
+        if(!visible){
+          if(!empty){empty=document.createElement('div');empty.className='empty-state';empty.textContent='NO SE HAN ENCONTRADO ARCHIVOS // PRUEBA OTRA BÚSQUEDA';grid.appendChild(empty);}
+        }else if(empty)empty.remove();
+      }
+      search.addEventListener('input',renderCards);
+      favoritesFilter.addEventListener('click',()=>{
+        favoritesOnly=!favoritesOnly;
+        favoritesFilter.classList.toggle('active',favoritesOnly);
+        favoritesFilter.setAttribute('aria-pressed',String(favoritesOnly));
+        favoritesFilter.textContent=favoritesOnly?'★ MOSTRANDO FAVORITOS':'☆ FAVORITOS';
+        renderCards();
+      });
+      renderCards();
+
+      let minutes=0,power=99;
+      const clock=document.getElementById('clock'),powerEl=document.getElementById('power');
+      window.setInterval(()=>{
+        minutes=(minutes+1)%60;
+        if(minutes%12===0&&power>84)power--;
+        clock.textContent='12:'+String(minutes).padStart(2,'0')+' AM • NIGHT 1';
+        powerEl.textContent=power+'%';
+      },6500);
+    })();
+  </script>
+</body>
+</html>
