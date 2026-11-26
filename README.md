@@ -32,6 +32,6 @@ El workflow **Site integrity checks** verifica los ocho puntos de entrada, la si
 Five Nights at Freddy's, sus personajes, marcas y materiales originales pertenecen a sus respectivos titulares. Este repositorio no reclama la propiedad de esos elementos. Los derechos y condiciones de uso de los recursos de terceros siguen perteneciendo a sus propietarios.
 
 
-## Compatibilidad móvil
+## Experiencia móvil
 
-La interfaz se adapta automáticamente a móviles y pantallas táctiles. Los juegos conservan su lienzo y proporciones originales, ajustándose al espacio disponible sin modificar sus mecánicas.
+La interfaz y los ocho juegos se adaptan a pantallas táctiles. Durante la partida, el lienzo de cada juego se escala automáticamente para aprovechar el espacio disponible sin deformar la imagen ni cambiar su resolución interna. En móviles se recomienda jugar en horizontal; también se ofrece acceso a pantalla completa cuando el navegador lo permite. Los motores y las mecánicas originales se mantienen sin modificaciones.
