@@ -141,7 +141,28 @@
       .control, .filter-btn, .favorite-toggle, .action, .card { touch-action: manipulation; }
     }
     @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
-  </style>
+  
+    @media (max-width: 700px), (pointer: coarse) {
+      body { padding: max(4px, env(safe-area-inset-top)) max(4px, env(safe-area-inset-right)) max(4px, env(safe-area-inset-bottom)) max(4px, env(safe-area-inset-left)); }
+      .terminal { padding: 12px 10px; }
+      .topbar { padding-bottom: 7px; gap: 5px; font-size: 8px; }
+      .top-right { display: none; }
+      header { padding: 10px 4px 10px; }
+      .eyebrow { margin-bottom: 5px; font-size: 8px; }
+      h1 { font-size: clamp(36px, 11vw, 52px); }
+      .title-sub { margin-top: 3px; font-size: clamp(19px, 5.5vw, 25px); }
+      .welcome { margin-top: 8px; font-size: 9px; }
+      .instructions { margin-top: 4px; font-size: 10px; }
+      .security { margin-top: 8px; padding: 5px 8px; font-size: 8px; }
+      .archive-head { margin-bottom: 8px; padding-bottom: 7px; }
+      .archive-tools { margin-bottom: 8px; }
+      .games { gap: 7px; }
+      .card { min-height: 104px; padding: 9px; }
+      .card h2 { margin: 6px 0 3px; font-size: 13px; }
+      .card p, .start { font-size: 8px; }
+      footer { margin-top: 10px; padding-top: 8px; }
+    }
+    </style>
 </head>
 <body>
   <div class="scanlines" id="scanlines"></div><div class="sweep"></div>
